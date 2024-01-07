@@ -29,7 +29,7 @@
     <ClInclude Include="ScreenGDI.hpp">
       <Filter>源文件\头文件</Filter>
     </ClInclude>
-    <ClInclude Include="drawicon.hpp">
+    <ClInclude Include="draw.hpp">
       <Filter>源文件\头文件</Filter>
     </ClInclude>
   </ItemGroup>
