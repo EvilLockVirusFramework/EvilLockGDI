@@ -45,9 +45,15 @@
     <ClInclude Include="LayeredTextout.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="PixelCanvas.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="1.cpp">
+    <ClCompile Include="test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ScreenGDI.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

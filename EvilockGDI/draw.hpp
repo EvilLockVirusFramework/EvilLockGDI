@@ -1,6 +1,6 @@
-/*****************************************************************//**
+ï»¿/*****************************************************************//**
  * @file				draw.hpp
- * @brief				IconÀà»æÖÆ - Í¼ĞÎ»æÖÆ¿â
+ * @brief				Iconç±»ç»˜åˆ¶ - å›¾å½¢ç»˜åˆ¶åº“
  *
  * @author				EvilLockVirusFramework
  * @date				2024-01-06
@@ -11,51 +11,53 @@
 
 #pragma once
 #include "common.hpp"
+#include "gdi_raii.hpp"
 #include <cmath>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <set>
 
-constexpr float CW = 1.0F;										///< ClockWise Ë³Ê±Õë
-constexpr float CCW = -1.0F;									///< Counter-ClockWise ÄæÊ±Õë
-constexpr bool	ICON_PEN_DOWN = true;							///< »­±ÊÂäÏÂ
-constexpr bool	ICON_PEN_UP = false;							///< »­±ÊÌ§Æğ
+constexpr float CW = 1.0F;										///< ClockWise é¡ºæ—¶é’ˆ
+constexpr float CCW = -1.0F;									///< Counter-ClockWise é€†æ—¶é’ˆ
+constexpr bool	ICON_PEN_DOWN = true;							///< ç”»ç¬”è½ä¸‹
+constexpr bool	ICON_PEN_UP = false;							///< ç”»ç¬”æŠ¬èµ·
 
 /**
- * @brief														: IconÀà»æÖÆ - Í¼ĞÎ»æÖÆ¿â
- * @details														: Ê¹ÓÃ±ê×¼Í¼ĞÎ×ø±êÏµ£¨YÖáÏòÏÂ£¬0¶ÈÖ¸ÏòÕıÓÒ·½£©
+ * @brief														: Iconç±»ç»˜åˆ¶ - å›¾å½¢ç»˜åˆ¶åº“
+ * @details														: ä½¿ç”¨æ ‡å‡†å›¾å½¢åæ ‡ç³»ï¼ˆYè½´å‘ä¸‹ï¼Œ0åº¦æŒ‡å‘æ­£å³æ–¹ï¼‰
  */
-class IconDrawer {
+class Pen {
 private:
-	HDC hdc;													///< Ä¿±êÉè±¸ÉÏÏÂÎÄ
-	HICON icon;													///< Í¼±ê¾ä±ú
-	bool penState;												///< »­±Ê×´Ì¬
-	int sensitivity;											///< ÁéÃô¶È£¨Í¼±ê¼ä¸ô£©
-	int penSpeed;												///< »­±ÊËÙ¶È£¨ºÁÃëÑÓ³Ù£©
-	POINT_2D position;											///< µ±Ç°Î»ÖÃ
-	float angle;												///< µ±Ç°·½Ïò£¨»¡¶ÈÖÆ£¬0¶ÈÖ¸ÏòÕıÓÒ·½£©
-	COLORREF penColor;											///< »­±ÊÑÕÉ«
-	int penWidth;												///< »­±Ê¿í¶È
-	std::vector<POINT_2D> fillPoints;							///< Ìî³äÂ·¾¶µã
-	bool isFilling;												///< ÊÇ·ñÕıÔÚ¼ÇÂ¼Ìî³äÂ·¾¶
-	HICON fillIcon;												///< Ìî³äÍ¼±ê¾ä±ú
-	int fillDensity;											///< Ìî³äÃÜ¶È£¨Í¼±ê¼ä¾à£©
+	HDC hdc;													///< ç›®æ ‡è®¾å¤‡ä¸Šä¸‹æ–‡
+	HICON icon;													///< å›¾æ ‡å¥æŸ„
+	bool penState;												///< ç”»ç¬”çŠ¶æ€
+	int sensitivity;											///< çµæ•åº¦ï¼ˆå›¾æ ‡é—´éš”ï¼‰
+	int penSpeed;												///< ç”»ç¬”é€Ÿåº¦ï¼ˆæ¯«ç§’å»¶è¿Ÿï¼‰
+	POINT_2D position;											///< å½“å‰ä½ç½®
+	POINT_2D homePosition;										///< â€œå®¶/åŸç‚¹â€ï¼šæ„é€ æ—¶é»˜è®¤åœ¨çª—å£ä¸­å¿ƒï¼ˆä¾¿äºæ–°æ‰‹ç†è§£ï¼‰
+	float angle;												///< å½“å‰æ–¹å‘ï¼ˆå¼§åº¦åˆ¶ï¼Œ0åº¦æŒ‡å‘æ­£å³æ–¹ï¼‰
+	COLORREF penColor;											///< ç”»ç¬”é¢œè‰²
+	int penWidth;												///< ç”»ç¬”å®½åº¦
+	std::vector<POINT_2D> fillPoints;							///< å¡«å……è·¯å¾„ç‚¹
+	bool isFilling;												///< æ˜¯å¦æ­£åœ¨è®°å½•å¡«å……è·¯å¾„
+	HICON fillIcon;												///< å¡«å……å›¾æ ‡å¥æŸ„
+	int fillDensity;											///< å¡«å……å¯†åº¦ï¼ˆå›¾æ ‡é—´è·ï¼‰
 
 public:
 	/**
-	 * @brief													: »ñÈ¡µ±Ç°Î»ÖÃ
-	 * @return													: µ±Ç°Î»ÖÃ
+	 * @brief													: è·å–å½“å‰ä½ç½®
+	 * @return													: å½“å‰ä½ç½®
 	 */
 	POINT_2D getStartPos() const { return position; }
 
 	/**
-	 * @brief													: ³õÊ¼»¯IconDrawerÀà
+	 * @brief													: åˆå§‹åŒ–IconDrawerç±»
 	 *
-	 * @param[in]		hdc										: Ä¿±êÉè±¸ÉÏÏÂÎÄ
-	 * @param[in]		icon									: Í¼±ê¾ä±ú
+	 * @param[in]		hdc										: ç›®æ ‡è®¾å¤‡ä¸Šä¸‹æ–‡
+	 * @param[in]		icon									: å›¾æ ‡å¥æŸ„
 	 */
-	IconDrawer(HDC hdc, HICON icon = nullptr) :
+	explicit Pen(HDC hdc, HICON icon = nullptr) :
 		hdc(hdc), icon(icon), penState(ICON_PEN_DOWN),
 		sensitivity(10), penSpeed(10), angle(0.0f),
 		penColor(RGB(0, 0, 0)), penWidth(1), isFilling(false),
@@ -67,61 +69,107 @@ public:
 		const float width = static_cast<float>(rect.right - rect.left);
 		const float height = static_cast<float>(rect.bottom - rect.top);
 
-		// ³õÊ¼Î»ÖÃÔÚ´°¿ÚÖĞĞÄ
+		// åˆå§‹ä½ç½®åœ¨çª—å£ä¸­å¿ƒ
 		position.set_float_x(width / 2.0F);
 		position.set_float_y(height / 2.0F);
+		homePosition = position;
 	}
 
-	// ==================== ×Ö·ûµãÕó»æÖÆ¹¦ÄÜ ====================
+	/**
+	 * @brief Python é£æ ¼ï¼šå›åˆ°â€œå®¶â€ï¼ˆçª—å£ä¸­å¿ƒï¼‰
+	 * @details æµ·é¾Ÿåº“é‡Œå¸¸è§çš„ `home()`ï¼Œå¯¹å­©å­æ¥è¯´æ¯”â€œè®¾ç½®åæ ‡â€æ›´ç›´è§‚ã€‚
+	 */
+	void home()
+	{
+		position = homePosition;
+	}
 
 	/**
-	 * @brief »ñÈ¡×Ö·ûµÄµãÕóÊı¾İ£¨Ö§³ÖÖĞÎÄ£©
-	 * @param ch Òª½âÎöµÄ×Ö·û£¨¿í×Ö·û£©
-	 * @param fontName ×ÖÌåÃû³Æ
-	 * @param fontSize ×ÖÌå´óĞ¡
-	 * @return µãÕóÊı¾İÏòÁ¿
+	 * @brief Python é£æ ¼ï¼šæŠ¬èµ·ç”»ç¬”ï¼ˆç§»åŠ¨ä¸ç”»ï¼‰
 	 */
-	std::vector<POINT_2D> getCharBitmap(wchar_t ch, const std::wstring& fontName = L"Î¢ÈíÑÅºÚ", int fontSize = 20) {
+	void penup() { setPenStatus(ICON_PEN_UP); }
+
+	/**
+	 * @brief Python é£æ ¼ï¼šè½ä¸‹ç”»ç¬”ï¼ˆç§»åŠ¨ä¼šç”»ï¼‰
+	 */
+	void pendown() { setPenStatus(ICON_PEN_DOWN); }
+
+	/**
+	 * @brief Python é£æ ¼ï¼šè®¾ç½®ç”»ç¬”é€Ÿåº¦ï¼ˆå•ä½ï¼šæ¯«ç§’ï¼‰
+	 * @details æ•°å€¼è¶Šå°è¶Šå¿«ï¼›0 è¡¨ç¤ºä¸å»¶è¿Ÿã€‚
+	 */
+	void speed(int ms) { setPenSpeed(ms); }
+
+	/**
+	 * @brief Python é£æ ¼ï¼šè®¾ç½®ç”»ç¬”ç²—ç»†
+	 */
+	void pensize(int width) { setPenWidth(width); }
+
+	/**
+	 * @brief Python é£æ ¼ï¼šè®¾ç½®ç”»ç¬”é¢œè‰²
+	 */
+	void pencolor(COLORREF color) { setPenColor(color); }
+
+	/**
+	 * @brief Python é£æ ¼ï¼šç¬ç§»åˆ°æŒ‡å®šåæ ‡ï¼ˆä¸æ”¹å˜æœå‘ï¼‰
+	 */
+	void goto_xy(int x, int y) { setStartPos(x, y); }
+
+	// ==================== å­—ç¬¦ç‚¹é˜µç»˜åˆ¶åŠŸèƒ½ ====================
+
+	/**
+	 * @brief è·å–å­—ç¬¦çš„ç‚¹é˜µæ•°æ®ï¼ˆæ”¯æŒä¸­æ–‡ï¼‰
+	 * @param ch è¦è§£æçš„å­—ç¬¦ï¼ˆå®½å­—ç¬¦ï¼‰
+	 * @param fontName å­—ä½“åç§°
+	 * @param fontSize å­—ä½“å¤§å°
+	 * @return ç‚¹é˜µæ•°æ®å‘é‡
+	 */
+	std::vector<POINT_2D> getCharBitmap(wchar_t ch, const std::wstring& fontName = L"å¾®è½¯é›…é»‘", int fontSize = 20) {
 		std::vector<POINT_2D> points;
 
-		// ´´½¨×ÖÌå£¨Ê¹ÓÃ¿í×Ö·û°æ±¾£©
-		HFONT hFont = CreateFontW(
+		// åˆ›å»ºå­—ä½“ï¼ˆä½¿ç”¨å®½å­—ç¬¦ç‰ˆæœ¬ï¼‰
+		evgdi::win::unique_hfont font(CreateFontW(
 			-fontSize, 0, 0, 0, FW_BOLD,
 			FALSE, FALSE, FALSE, DEFAULT_CHARSET,
 			OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
 			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
 			fontName.c_str()
-		);
+		));
 
-		if (!hFont) return points;
+		if (!font) return points;
 
-		// ´´½¨ÄÚ´æDC
-		HDC hMemDC = CreateCompatibleDC(hdc);
-		HFONT hOldFont = (HFONT)SelectObject(hMemDC, hFont);
+		// åˆ›å»ºå†…å­˜DCï¼ˆéœ€è¦ DeleteDCï¼Œæ‰€ä»¥ç”¨ unique_hdcï¼‰
+		evgdi::win::unique_hdc memDC(CreateCompatibleDC(hdc));
+		if (!memDC) return points;
 
-		// »ñÈ¡×Ö·û³ß´ç£¨¿í×Ö·û°æ±¾£©
+		evgdi::win::select_object_guard fontSel(memDC.get(), font.get());
+
+		// è·å–å­—ç¬¦å°ºå¯¸ï¼ˆå®½å­—ç¬¦ç‰ˆæœ¬ï¼‰
 		SIZE size;
-		GetTextExtentPoint32W(hMemDC, &ch, 1, &size);
+		GetTextExtentPoint32W(memDC.get(), &ch, 1, &size);
 
-		// ´´½¨Î»Í¼
-		HBITMAP hBitmap = CreateCompatibleBitmap(hdc, size.cx, size.cy);
-		HBITMAP hOldBitmap = (HBITMAP)SelectObject(hMemDC, hBitmap);
+		// åˆ›å»ºä½å›¾
+		evgdi::win::unique_hbitmap bitmap(CreateCompatibleBitmap(hdc, size.cx, size.cy));
+		if (!bitmap) return points;
 
-		// ÉèÖÃ±³¾°Îª°×É«
+		evgdi::win::select_object_guard bmpSel(memDC.get(), bitmap.get());
+
+		// è®¾ç½®èƒŒæ™¯ä¸ºç™½è‰²
 		RECT rect = { 0, 0, size.cx, size.cy };
-		HBRUSH hWhiteBrush = CreateSolidBrush(RGB(255, 255, 255));
-		FillRect(hMemDC, &rect, hWhiteBrush);
+		evgdi::win::unique_hbrush whiteBrush(CreateSolidBrush(RGB(255, 255, 255)));
+		if (!whiteBrush) return points;
+		FillRect(memDC.get(), &rect, whiteBrush.get());
 
-		// »æÖÆ×Ö·û£¨ºÚÉ«£©- ¿í×Ö·û°æ±¾
-		SetTextColor(hMemDC, RGB(0, 0, 0));
-		SetBkMode(hMemDC, TRANSPARENT);
-		TextOutW(hMemDC, 0, 0, &ch, 1);
+		// ç»˜åˆ¶å­—ç¬¦ï¼ˆé»‘è‰²ï¼‰- å®½å­—ç¬¦ç‰ˆæœ¬
+		SetTextColor(memDC.get(), RGB(0, 0, 0));
+		SetBkMode(memDC.get(), TRANSPARENT);
+		TextOutW(memDC.get(), 0, 0, &ch, 1);
 
-		// É¨ÃèÎ»Í¼»ñÈ¡µãÕóÊı¾İ
+		// æ‰«æä½å›¾è·å–ç‚¹é˜µæ•°æ®
 		for (int y = 0; y < size.cy; y++) {
 			for (int x = 0; x < size.cx; x++) {
-				COLORREF color = GetPixel(hMemDC, x, y);
-				// Èç¹û²»ÊÇ°×É«£¨¼´×Ö·ûÏñËØ£©£¬Ôò¼ÇÂ¼¸Ãµã
+				COLORREF color = GetPixel(memDC.get(), x, y);
+				// å¦‚æœä¸æ˜¯ç™½è‰²ï¼ˆå³å­—ç¬¦åƒç´ ï¼‰ï¼Œåˆ™è®°å½•è¯¥ç‚¹
 				if (color != RGB(255, 255, 255)) {
 					POINT_2D point;
 					point.set_int_x(x);
@@ -131,36 +179,28 @@ public:
 			}
 		}
 
-		// ÇåÀí×ÊÔ´
-		SelectObject(hMemDC, hOldFont);
-		SelectObject(hMemDC, hOldBitmap);
-		DeleteObject(hFont);
-		DeleteObject(hBitmap);
-		DeleteObject(hWhiteBrush);
-		DeleteDC(hMemDC);
-
 		return points;
 	}
 
 	/**
-	 * @brief ¸ù¾İÌî³äÃÜ¶ÈÉ¸Ñ¡µãÕóÊı¾İ
-	 * @param points Ô­Ê¼µãÕóÊı¾İ
-	 * @param fillDensity Ìî³äÃÜ¶È (0-10)
-	 *        0: Ö»»æÖÆÂÖÀª
-	 *        5: ÖĞµÈÌî³ä
-	 *        10: ÍêÈ«Ìî³ä
-	 * @return É¸Ñ¡ºóµÄµãÕóÊı¾İ
+	 * @brief æ ¹æ®å¡«å……å¯†åº¦ç­›é€‰ç‚¹é˜µæ•°æ®
+	 * @param points åŸå§‹ç‚¹é˜µæ•°æ®
+	 * @param fillDensity å¡«å……å¯†åº¦ (0-10)
+	 *        0: åªç»˜åˆ¶è½®å»“
+	 *        5: ä¸­ç­‰å¡«å……
+	 *        10: å®Œå…¨å¡«å……
+	 * @return ç­›é€‰åçš„ç‚¹é˜µæ•°æ®
 	 */
 	std::vector<POINT_2D> filterPointsByDensity(const std::vector<POINT_2D>& points, int fillDensity) {
 		if (points.empty() || fillDensity >= 10) {
-			return points; // ÍêÈ«Ìî³ä»ò¿ÕÊı¾İ
+			return points; // å®Œå…¨å¡«å……æˆ–ç©ºæ•°æ®
 		}
 
 		if (fillDensity <= 0) {
-			return getOutlinePoints(points); // Ö»»æÖÆÂÖÀª
+			return getOutlinePoints(points); // åªç»˜åˆ¶è½®å»“
 		}
 
-		// »ñÈ¡±ß½ç¿ò
+		// è·å–è¾¹ç•Œæ¡†
 		int minX = points[0].get_int_x(), maxX = points[0].get_int_x();
 		int minY = points[0].get_int_y(), maxY = points[0].get_int_y();
 		for (const auto& point : points) {
@@ -172,10 +212,10 @@ public:
 
 		std::vector<POINT_2D> filteredPoints;
 
-		// ¸ù¾İÃÜ¶È¼ÆËã²ÉÑù¼ä¸ô
-		int step = 11 - fillDensity; // ÃÜ¶ÈÔ½¸ß£¬²½³¤Ô½Ğ¡
+		// æ ¹æ®å¯†åº¦è®¡ç®—é‡‡æ ·é—´éš”
+		int step = 11 - fillDensity; // å¯†åº¦è¶Šé«˜ï¼Œæ­¥é•¿è¶Šå°
 
-		// ·Ö²ã²ÉÑù£º´ÓÂÖÀª¿ªÊ¼£¬Öğ½¥ÏòÄÚÌî³ä
+		// åˆ†å±‚é‡‡æ ·ï¼šä»è½®å»“å¼€å§‹ï¼Œé€æ¸å‘å†…å¡«å……
 		for (int layer = 0; layer < fillDensity; layer++) {
 			int currentStep = step + layer;
 			for (int i = layer; i < points.size(); i += currentStep) {
@@ -183,7 +223,7 @@ public:
 			}
 		}
 
-		// È·±£°üº¬ÂÖÀªµã
+		// ç¡®ä¿åŒ…å«è½®å»“ç‚¹
 		std::vector<POINT_2D> outlinePoints = getOutlinePoints(points);
 		for (const auto& point : outlinePoints) {
 			if (std::find(filteredPoints.begin(), filteredPoints.end(), point) == filteredPoints.end()) {
@@ -195,7 +235,7 @@ public:
 	}
 
 	/**
-	 * @brief »ñÈ¡ÂÖÀªµã£¨±ß½çµã£©
+	 * @brief è·å–è½®å»“ç‚¹ï¼ˆè¾¹ç•Œç‚¹ï¼‰
 	 */
 	std::vector<POINT_2D> getOutlinePoints(const std::vector<POINT_2D>& points) {
 		if (points.empty()) return points;
@@ -203,14 +243,17 @@ public:
 		std::vector<POINT_2D> outlinePoints;
 		std::set<POINT_2D> pointSet(points.begin(), points.end());
 
-		// ¼ì²éÃ¿¸öµãµÄÁÚ¾Ó£¬Èç¹ûÈ±ÉÙÄ³¸ö·½ÏòµÄÁÚ¾Ó£¬ÔòÊÇ±ß½çµã
+		// æ£€æŸ¥æ¯ä¸ªç‚¹çš„é‚»å±…ï¼Œå¦‚æœç¼ºå°‘æŸä¸ªæ–¹å‘çš„é‚»å±…ï¼Œåˆ™æ˜¯è¾¹ç•Œç‚¹
 		int dx[] = { -1, 1, 0, 0 };
 		int dy[] = { 0, 0, -1, 1 };
 
 		for (const auto& point : points) {
 			bool isOutline = false;
 			for (int i = 0; i < 4; i++) {
-				POINT_2D neighbor(point.get_int_x() + dx[i], point.get_int_y() + dy[i]);
+				POINT_2D neighbor{
+					static_cast<float>(point.get_int_x() + dx[i]),
+					static_cast<float>(point.get_int_y() + dy[i])
+				};
 				if (pointSet.find(neighbor) == pointSet.end()) {
 					isOutline = true;
 					break;
@@ -225,38 +268,38 @@ public:
 	}
 
 	/**
-	 * @brief Ê¹ÓÃÍ¼±ê»æÖÆ×Ö·û´®£¨Ö§³ÖÖĞÎÄºÍÌî³äÃÜ¶È¿ØÖÆ£©
-	 * @param text Òª»æÖÆµÄÎÄ±¾£¨¿í×Ö·û£©
-	 * @param startX ÆğÊ¼X×ø±ê
-	 * @param startY ÆğÊ¼Y×ø±ê
-	 * @param scale Ëõ·Å±ÈÀı
-	 * @param spacing ×Ö·û¼ä¾à
-	 * @param fillDensity Ìî³äÃÜ¶È (0-10)
-	 * @param fontName ×ÖÌåÃû³Æ
-	 * @param fontSize ×ÖÌå´óĞ¡
+	 * @brief ä½¿ç”¨å›¾æ ‡ç»˜åˆ¶å­—ç¬¦ä¸²ï¼ˆæ”¯æŒä¸­æ–‡å’Œå¡«å……å¯†åº¦æ§åˆ¶ï¼‰
+	 * @param text è¦ç»˜åˆ¶çš„æ–‡æœ¬ï¼ˆå®½å­—ç¬¦ï¼‰
+	 * @param startX èµ·å§‹Xåæ ‡
+	 * @param startY èµ·å§‹Yåæ ‡
+	 * @param scale ç¼©æ”¾æ¯”ä¾‹
+	 * @param spacing å­—ç¬¦é—´è·
+	 * @param fillDensity å¡«å……å¯†åº¦ (0-10)
+	 * @param fontName å­—ä½“åç§°
+	 * @param fontSize å­—ä½“å¤§å°
 	 */
 	void drawTextWithIcons(const std::wstring& text, int startX, int startY,
 		float scale = 1.0f, int spacing = 5, int fillDensity = 10,
-		const std::wstring& fontName = L"Î¢ÈíÑÅºÚ", int fontSize = 20) {
+		const std::wstring& fontName = L"å¾®è½¯é›…é»‘", int fontSize = 20) {
 		if (!icon) return;
 
 		int currentX = startX;
 
 		for (wchar_t ch : text) {
-			// »ñÈ¡×Ö·ûµãÕóÊı¾İ
+			// è·å–å­—ç¬¦ç‚¹é˜µæ•°æ®
 			std::vector<POINT_2D> charPoints = getCharBitmap(ch, fontName, fontSize);
 
-			// ¸ù¾İÌî³äÃÜ¶ÈÉ¸Ñ¡µã
+			// æ ¹æ®å¡«å……å¯†åº¦ç­›é€‰ç‚¹
 			std::vector<POINT_2D> filteredPoints = filterPointsByDensity(charPoints, fillDensity);
 
-			// »æÖÆÉ¸Ñ¡ºóµÄµã
+			// ç»˜åˆ¶ç­›é€‰åçš„ç‚¹
 			for (const auto& point : filteredPoints) {
 				int x = currentX + static_cast<int>(point.get_int_x() * scale);
 				int y = startY + static_cast<int>(point.get_int_y() * scale);
 				DrawIconEx(hdc, x, y, icon, 0, 0, 0, nullptr, DI_NORMAL);
 			}
 
-			// ¼ÆËã×Ö·û¿í¶È²¢¸üĞÂÎ»ÖÃ
+			// è®¡ç®—å­—ç¬¦å®½åº¦å¹¶æ›´æ–°ä½ç½®
 			if (!charPoints.empty()) {
 				int maxX = 0;
 				for (const auto& point : charPoints) {
@@ -267,12 +310,12 @@ public:
 		}
 	}
 
-	// ==================== Ô­ÓĞ»æÍ¼¹¦ÄÜ ====================
+	// ==================== åŸæœ‰ç»˜å›¾åŠŸèƒ½ ====================
 
 	/**
-	 * @brief													: ¿ªÊ¼Ìî³ä - ÀàËÆturtle.begin_fill()
-	 * @param[in]		fillIcon								: Ìî³äÍ¼±ê£¨¿ÉÑ¡£¬nullptrÊ¹ÓÃÑÕÉ«Ìî³ä£©
-	 * @param[in]		density									: Ìî³äÃÜ¶È£¨Í¼±ê¼ä¾à£¬Ä¬ÈÏ15£©
+	 * @brief													: å¼€å§‹å¡«å…… - ç±»ä¼¼turtle.begin_fill()
+	 * @param[in]		fillIcon								: å¡«å……å›¾æ ‡ï¼ˆå¯é€‰ï¼Œnullpträ½¿ç”¨é¢œè‰²å¡«å……ï¼‰
+	 * @param[in]		density									: å¡«å……å¯†åº¦ï¼ˆå›¾æ ‡é—´è·ï¼Œé»˜è®¤15ï¼‰
 	 */
 	void beginFill(HICON fillIcon = nullptr, int density = 15) {
 		fillPoints.clear();
@@ -280,13 +323,13 @@ public:
 		this->fillIcon = fillIcon;
 		this->fillDensity = (density > 0) ? density : 15;
 
-		// ¼ÇÂ¼µ±Ç°Î»ÖÃ×÷ÎªÆğµã
+		// è®°å½•å½“å‰ä½ç½®ä½œä¸ºèµ·ç‚¹
 		fillPoints.push_back(position);
 	}
 
 	/**
-	 * @brief													: ½áÊøÌî³ä - ÀàËÆturtle.end_fill()
-	 * @param[in]		fillColor								: Ìî³äÑÕÉ«£¨µ±²»Ê¹ÓÃÍ¼±êÌî³äÊ±£©
+	 * @brief													: ç»“æŸå¡«å…… - ç±»ä¼¼turtle.end_fill()
+	 * @param[in]		fillColor								: å¡«å……é¢œè‰²ï¼ˆå½“ä¸ä½¿ç”¨å›¾æ ‡å¡«å……æ—¶ï¼‰
 	 */
 	void endFill(COLORREF fillColor = RGB(255, 0, 0)) {
 		if (!isFilling || fillPoints.size() < 3) {
@@ -296,13 +339,13 @@ public:
 			return;
 		}
 
-		// È·±£Â·¾¶±ÕºÏ
+		// ç¡®ä¿è·¯å¾„é—­åˆ
 		if (fillPoints.front().get_int_x() != fillPoints.back().get_int_x() ||
 			fillPoints.front().get_int_y() != fillPoints.back().get_int_y()) {
 			fillPoints.push_back(fillPoints.front());
 		}
 
-		// ¸ù¾İÊÇ·ñÊ¹ÓÃÍ¼±êÑ¡ÔñÌî³ä·½Ê½
+		// æ ¹æ®æ˜¯å¦ä½¿ç”¨å›¾æ ‡é€‰æ‹©å¡«å……æ–¹å¼
 		if (fillIcon) {
 			fillWithIcons(fillPoints, fillIcon, fillDensity);
 		}
@@ -316,16 +359,16 @@ public:
 	}
 
 	/**
-	 * @brief													: Ê¹ÓÃÍ¼±êÌî³ä¶à±ßĞÎÇøÓò
+	 * @brief													: ä½¿ç”¨å›¾æ ‡å¡«å……å¤šè¾¹å½¢åŒºåŸŸ
 	 *
-	 * @param[in]		points									: ¶à±ßĞÎ¶¥µã
-	 * @param[in]		fillIcon								: Ìî³äÍ¼±ê
-	 * @param[in]		density									: Ìî³äÃÜ¶È
+	 * @param[in]		points									: å¤šè¾¹å½¢é¡¶ç‚¹
+	 * @param[in]		fillIcon								: å¡«å……å›¾æ ‡
+	 * @param[in]		density									: å¡«å……å¯†åº¦
 	 */
 	void fillWithIcons(const std::vector<POINT_2D>& points, HICON fillIcon, int density) {
 		if (points.size() < 3 || !fillIcon) return;
 
-		// »ñÈ¡¶à±ßĞÎµÄ±ß½ç¿ò
+		// è·å–å¤šè¾¹å½¢çš„è¾¹ç•Œæ¡†
 		int minX = points[0].get_int_x();
 		int maxX = points[0].get_int_x();
 		int minY = points[0].get_int_y();
@@ -338,24 +381,24 @@ public:
 			maxY = (std::max)(maxY, point.get_int_y());
 		}
 
-		// ´´½¨GDIµãÊı×éÓÃÓÚÃüÖĞ²âÊÔ
+		// åˆ›å»ºGDIç‚¹æ•°ç»„ç”¨äºå‘½ä¸­æµ‹è¯•
 		std::vector<POINT> gdiPoints;
 		for (const auto& point : points) {
 			gdiPoints.push_back({ point.get_int_x(), point.get_int_y() });
 		}
 
-		// ´´½¨ÇøÓòÓÃÓÚÃüÖĞ²âÊÔ
+		// åˆ›å»ºåŒºåŸŸç”¨äºå‘½ä¸­æµ‹è¯•
 		HRGN hRegion = CreatePolygonRgn(gdiPoints.data(), static_cast<int>(gdiPoints.size()), WINDING);
 
-		// ±£´æµ±Ç°Í¼±ê×´Ì¬
+		// ä¿å­˜å½“å‰å›¾æ ‡çŠ¶æ€
 		HICON oldIcon = icon;
 		int oldPenSpeed = penSpeed;
 
-		// ÉèÖÃÌî³äÍ¼±êºÍËÙ¶È
+		// è®¾ç½®å¡«å……å›¾æ ‡å’Œé€Ÿåº¦
 		icon = fillIcon;
-		penSpeed = 0; // Ìî³äÊ±²»ĞèÒªÑÓ³Ù
+		penSpeed = 0; // å¡«å……æ—¶ä¸éœ€è¦å»¶è¿Ÿ
 
-		// É¨ÃèÌî³ä
+		// æ‰«æå¡«å……
 		for (int y = minY; y <= maxY; y += density) {
 			for (int x = minX; x <= maxX; x += density) {
 				if (PtInRegion(hRegion, x, y)) {
@@ -364,28 +407,28 @@ public:
 			}
 		}
 
-		// »Ö¸´×´Ì¬
+		// æ¢å¤çŠ¶æ€
 		icon = oldIcon;
 		penSpeed = oldPenSpeed;
 		DeleteObject(hRegion);
 	}
 
 	/**
-	 * @brief													: Ìî³ä¶à±ßĞÎÇøÓò
+	 * @brief													: å¡«å……å¤šè¾¹å½¢åŒºåŸŸ
 	 *
-	 * @param[in]		points									: ¶à±ßĞÎ¶¥µã
-	 * @param[in]		fillColor								: Ìî³äÑÕÉ«
+	 * @param[in]		points									: å¤šè¾¹å½¢é¡¶ç‚¹
+	 * @param[in]		fillColor								: å¡«å……é¢œè‰²
 	 */
 	void fillPolygon(const std::vector<POINT_2D>& points, COLORREF fillColor) {
 		if (points.size() < 3) return;
 
-		// ´´½¨¶à±ßĞÎµãÊı×é
+		// åˆ›å»ºå¤šè¾¹å½¢ç‚¹æ•°ç»„
 		std::vector<POINT> gdiPoints;
 		for (const auto& point : points) {
 			gdiPoints.push_back({ point.get_int_x(), point.get_int_y() });
 		}
 
-		// Ê¹ÓÃGDIÌî³ä¶à±ßĞÎ
+		// ä½¿ç”¨GDIå¡«å……å¤šè¾¹å½¢
 		HBRUSH hBrush = CreateSolidBrush(fillColor);
 		HPEN hPen = CreatePen(PS_NULL, 1, fillColor);
 
@@ -401,10 +444,10 @@ public:
 	}
 
 	/**
-	 * @brief													: »æÖÆÖ±Ïß
-	 * @details													: ÒÔangleÎª·½Ïò£¬´Óµ±Ç°Î»ÖÃ»æÖÆÖ¸¶¨³¤¶ÈµÄÖ±Ïß
+	 * @brief													: ç»˜åˆ¶ç›´çº¿
+	 * @details													: ä»¥angleä¸ºæ–¹å‘ï¼Œä»å½“å‰ä½ç½®ç»˜åˆ¶æŒ‡å®šé•¿åº¦çš„ç›´çº¿
 	 *
-	 * @param[in]		distance								: ³¤¶È
+	 * @param[in]		distance								: é•¿åº¦
 	 */
 	void forward(int distance)
 	{
@@ -419,25 +462,25 @@ public:
 		endPos.set_float_x(position.get_float_x() + disF * cosA);
 		endPos.set_float_y(position.get_float_y() + disF * sinA);
 
-		// ¸üĞÂÎ»ÖÃ
+		// æ›´æ–°ä½ç½®
 		position = endPos;
 
-		// ¼ÇÂ¼Ìî³äÂ·¾¶µã
+		// è®°å½•å¡«å……è·¯å¾„ç‚¹
 		if (isFilling && penState) {
 			fillPoints.push_back(position);
 		}
 
-		// Èç¹û»­±ÊÂäÏÂ£¬»æÖÆÖ±Ïß
+		// å¦‚æœç”»ç¬”è½ä¸‹ï¼Œç»˜åˆ¶ç›´çº¿
 		if (penState)
 		{
 			if (icon)
 			{
-				// Ê¹ÓÃÍ¼±ê»æÖÆ
+				// ä½¿ç”¨å›¾æ ‡ç»˜åˆ¶
 				drawLineWithIcons(startPos, endPos);
 			}
 			else
 			{
-				// Ê¹ÓÃGDIÖ±Ïß»æÖÆ
+				// ä½¿ç”¨GDIç›´çº¿ç»˜åˆ¶
 				HPEN hPen = CreatePen(PS_SOLID, penWidth, penColor);
 				HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
 
@@ -451,9 +494,9 @@ public:
 	}
 
 	/**
-	 * @brief													: ·´Ïò»æÖÆÖ±Ïß
+	 * @brief													: åå‘ç»˜åˆ¶ç›´çº¿
 	 *
-	 * @param[in]		distance								: ³¤¶È
+	 * @param[in]		distance								: é•¿åº¦
 	 */
 	void backward(int distance)
 	{
@@ -461,9 +504,9 @@ public:
 	}
 
 	/**
-	 * @brief													: ÓÒ×ª
+	 * @brief													: å³è½¬
 	 *
-	 * @param[in]		degrees									: ½Ç¶È
+	 * @param[in]		degrees									: è§’åº¦
 	 */
 	void right(float degrees)
 	{
@@ -472,9 +515,9 @@ public:
 	}
 
 	/**
-	 * @brief													: ×ó×ª
+	 * @brief													: å·¦è½¬
 	 *
-	 * @param[in]		degrees									: ½Ç¶È
+	 * @param[in]		degrees									: è§’åº¦
 	 */
 	void left(float degrees)
 	{
@@ -483,10 +526,10 @@ public:
 	}
 
 	/**
-	 * @brief													: ÒÆ¶¯µ½Ö¸¶¨Î»ÖÃ£¨²»»æÖÆ£©
+	 * @brief													: ç§»åŠ¨åˆ°æŒ‡å®šä½ç½®ï¼ˆä¸ç»˜åˆ¶ï¼‰
 	 *
-	 * @param[in]		x										: X×ø±ê
-	 * @param[in]		y										: Y×ø±ê
+	 * @param[in]		x										: Xåæ ‡
+	 * @param[in]		y										: Yåæ ‡
 	 */
 	void moveTo(int x, int y)
 	{
@@ -495,7 +538,7 @@ public:
 		position.set_int_x(x);
 		position.set_int_y(y);
 
-		// ¼ÇÂ¼Ìî³äÂ·¾¶µã£¨ÒÆ¶¯Ò²¼ÇÂ¼Â·¾¶£©
+		// è®°å½•å¡«å……è·¯å¾„ç‚¹ï¼ˆç§»åŠ¨ä¹Ÿè®°å½•è·¯å¾„ï¼‰
 		if (isFilling) {
 			fillPoints.push_back(position);
 		}
@@ -504,10 +547,10 @@ public:
 	}
 
 	/**
-	 * @brief													: ÒÆ¶¯µ½Ö¸¶¨Î»ÖÃ²¢»æÖÆ
+	 * @brief													: ç§»åŠ¨åˆ°æŒ‡å®šä½ç½®å¹¶ç»˜åˆ¶
 	 *
-	 * @param[in]		x										: X×ø±ê
-	 * @param[in]		y										: Y×ø±ê
+	 * @param[in]		x										: Xåæ ‡
+	 * @param[in]		y										: Yåæ ‡
 	 */
 	void lineTo(int x, int y)
 	{
@@ -515,7 +558,7 @@ public:
 		position.set_int_x(x);
 		position.set_int_y(y);
 
-		// ¼ÇÂ¼Ìî³äÂ·¾¶µã
+		// è®°å½•å¡«å……è·¯å¾„ç‚¹
 		if (isFilling && penState) {
 			fillPoints.push_back(position);
 		}
@@ -541,12 +584,12 @@ public:
 	}
 
 	/**
-	 * @brief													: »æÖÆÔ²»¡
-	 * @details													: ÒÔµ±Ç°Î»ÖÃÎªÇĞµã»æÖÆÔ²»¡£¬Óë±ê×¼Í¼ĞÎ¿âĞĞÎªÒ»ÖÂ
+	 * @brief													: ç»˜åˆ¶åœ†å¼§
+	 * @details													: ä»¥å½“å‰ä½ç½®ä¸ºåˆ‡ç‚¹ç»˜åˆ¶åœ†å¼§ï¼Œä¸æ ‡å‡†å›¾å½¢åº“è¡Œä¸ºä¸€è‡´
 	 *
-	 * @param[in]		radius									: °ë¾¶
-	 * @param[in]		angleDegrees							: ½Ç¶È£¨¶ÈÊı£©
-	 * @param[in]		direction								: ·½Ïò£¨CWË³Ê±Õë£¬CCWÄæÊ±Õë£©
+	 * @param[in]		radius									: åŠå¾„
+	 * @param[in]		angleDegrees							: è§’åº¦ï¼ˆåº¦æ•°ï¼‰
+	 * @param[in]		direction								: æ–¹å‘ï¼ˆCWé¡ºæ—¶é’ˆï¼ŒCCWé€†æ—¶é’ˆï¼‰
 	 */
 	void drawArc(int radius, float angleDegrees, float direction = CW)
 	{
@@ -555,24 +598,24 @@ public:
 		const float radF = static_cast<float>(radius);
 		const float angleRad = fabsf(angleDegrees) * (PI / 180.0f);
 
-		// ĞŞ¸´£ºÔ²ĞÄ×ÜÊÇÔÚ¹â±êµÄ×ó²à£¨Èç¹û°ë¾¶ÎªÕı£©»òÓÒ²à£¨Èç¹û°ë¾¶Îª¸º£©
+		// ä¿®å¤ï¼šåœ†å¿ƒæ€»æ˜¯åœ¨å…‰æ ‡çš„å·¦ä¾§ï¼ˆå¦‚æœåŠå¾„ä¸ºæ­£ï¼‰æˆ–å³ä¾§ï¼ˆå¦‚æœåŠå¾„ä¸ºè´Ÿï¼‰
 		float centerX = position.get_float_x();
 		float centerY = position.get_float_y();
 
 		if (radius > 0) {
-			centerX += fabsf(radF) * cosf(angle + PI / 2.0f);  // Ô²ĞÄÔÚ×ó²à
+			centerX += fabsf(radF) * cosf(angle + PI / 2.0f);  // åœ†å¿ƒåœ¨å·¦ä¾§
 			centerY += fabsf(radF) * sinf(angle + PI / 2.0f);
 		}
 		else {
-			centerX += fabsf(radF) * cosf(angle - PI / 2.0f);  // Ô²ĞÄÔÚÓÒ²à  
+			centerX += fabsf(radF) * cosf(angle - PI / 2.0f);  // åœ†å¿ƒåœ¨å³ä¾§  
 			centerY += fabsf(radF) * sinf(angle - PI / 2.0f);
 		}
 
-		// ¼ÆËã´ÓÔ²ĞÄµ½µ±Ç°Î»ÖÃµÄÆğÊ¼½Ç¶È
+		// è®¡ç®—ä»åœ†å¿ƒåˆ°å½“å‰ä½ç½®çš„èµ·å§‹è§’åº¦
 		float startAngle = atan2f(position.get_float_y() - centerY,
 			position.get_float_x() - centerX);
 
-		// ¼ÆËã²½Êı
+		// è®¡ç®—æ­¥æ•°
 		const float arcLength = fabsf(radF) * angleRad;
 		const int steps = static_cast<int>(arcLength / sensitivity) + 1;
 		const float angleStep = (direction == CW ? angleRad : -angleRad) / steps;
@@ -586,7 +629,7 @@ public:
 			point.set_float_x(centerX + fabsf(radF) * cosf(currentAngle));
 			point.set_float_y(centerY + fabsf(radF) * sinf(currentAngle));
 
-			// ¼ÇÂ¼Ìî³äÂ·¾¶µã
+			// è®°å½•å¡«å……è·¯å¾„ç‚¹
 			if (isFilling && penState) {
 				fillPoints.push_back(point);
 			}
@@ -613,22 +656,22 @@ public:
 			lastPoint = point;
 		}
 
-		// Óë±ê×¼Í¼ĞÎ¿âÒ»ÖÂ£ºÔ²»¡½áÊøºó×Ô¶¯¸üĞÂÎªÇĞÏß·½Ïò
+		// ä¸æ ‡å‡†å›¾å½¢åº“ä¸€è‡´ï¼šåœ†å¼§ç»“æŸåè‡ªåŠ¨æ›´æ–°ä¸ºåˆ‡çº¿æ–¹å‘
 		position = lastPoint;
 		float endAngle = startAngle + (direction == CW ? angleRad : -angleRad);
 		if (radius > 0) {
-			angle = endAngle + PI / 2.0f;  // Õı°ë¾¶£ºÇĞÏß·½Ïò
+			angle = endAngle + PI / 2.0f;  // æ­£åŠå¾„ï¼šåˆ‡çº¿æ–¹å‘
 		}
 		else {
-			angle = endAngle - PI / 2.0f;  // ¸º°ë¾¶£ºÇĞÏß·½Ïò
+			angle = endAngle - PI / 2.0f;  // è´ŸåŠå¾„ï¼šåˆ‡çº¿æ–¹å‘
 		}
 		normalizeAngle();
 	}
 
 	/**
-	 * @brief													: »æÖÆÔ²
+	 * @brief													: ç»˜åˆ¶åœ†
 	 *
-	 * @param[in]		radius									: °ë¾¶
+	 * @param[in]		radius									: åŠå¾„
 	 */
 	void drawCircle(int radius)
 	{
@@ -636,10 +679,10 @@ public:
 	}
 
 	/**
-	 * @brief													: »æÖÆ¾ØĞÎ
+	 * @brief													: ç»˜åˆ¶çŸ©å½¢
 	 *
-	 * @param[in]		width									: ¿í¶È
-	 * @param[in]		height									: ¸ß¶È
+	 * @param[in]		width									: å®½åº¦
+	 * @param[in]		height									: é«˜åº¦
 	 */
 	void drawRectangle(int width, int height)
 	{
@@ -655,10 +698,10 @@ public:
 	}
 
 	/**
-	 * @brief													: »æÖÆ¶à±ßĞÎ
+	 * @brief													: ç»˜åˆ¶å¤šè¾¹å½¢
 	 *
-	 * @param[in]		sides									: ±ßÊı
-	 * @param[in]		length									: ±ß³¤
+	 * @param[in]		sides									: è¾¹æ•°
+	 * @param[in]		length									: è¾¹é•¿
 	 */
 	void drawPolygon(int sides, int length)
 	{
@@ -677,45 +720,43 @@ public:
 	}
 
 	/**
-	 * @brief													: »æÖÆÎÄ±¾
-	 * @details													: ÔÚµ±Ç°Î»ÖÃ»æÖÆÎÄ±¾
+	 * @brief													: ç»˜åˆ¶æ–‡æœ¬
+	 * @details													: åœ¨å½“å‰ä½ç½®ç»˜åˆ¶æ–‡æœ¬
 	 *
-	 * @param[in]		text									: ÎÄ±¾ÄÚÈİ
-	 * @param[in]		fontSize								: ×ÖÌå´óĞ¡
-	 * @param[in]		textColor								: ÎÄ±¾ÑÕÉ«
-	 * @param[in]		fontName								: ×ÖÌåÃû³Æ£¨Ä¬ÈÏÎªArial£©
+	 * @param[in]		text									: æ–‡æœ¬å†…å®¹
+	 * @param[in]		fontSize								: å­—ä½“å¤§å°
+	 * @param[in]		textColor								: æ–‡æœ¬é¢œè‰²
+	 * @param[in]		fontName								: å­—ä½“åç§°ï¼ˆé»˜è®¤ä¸ºArialï¼‰
 	 */
 	void drawText(const std::string& text, int fontSize, COLORREF textColor, const std::string& fontName = "Arial")
 	{
-		// ´´½¨×ÖÌå
-		HFONT hFont = CreateFontA(
+		// åˆ›å»ºå­—ä½“
+		evgdi::win::unique_hfont font(CreateFontA(
 			-fontSize, 0, 0, 0, FW_NORMAL,
 			FALSE, FALSE, FALSE, DEFAULT_CHARSET,
 			OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
 			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
 			fontName.c_str()
-		);
+		));
 
-		if (!hFont) return;
+		if (!font) return;
 
-		// Ñ¡Ôñ×ÖÌåµ½Éè±¸ÉÏÏÂÎÄ
-		HFONT hOldFont = (HFONT)SelectObject(hdc, hFont);
+		// é€‰æ‹©å­—ä½“åˆ°è®¾å¤‡ä¸Šä¸‹æ–‡
+		evgdi::win::select_object_guard fontSel(hdc, font.get());
 
-		// ÉèÖÃÎÄ±¾ÑÕÉ«ºÍ±³¾°Ä£Ê½
+		// è®¾ç½®æ–‡æœ¬é¢œè‰²å’ŒèƒŒæ™¯æ¨¡å¼
 		SetTextColor(hdc, textColor);
 		SetBkMode(hdc, TRANSPARENT);
 
-		// »æÖÆÎÄ±¾
+		// ç»˜åˆ¶æ–‡æœ¬
 		TextOutA(hdc, position.get_int_x(), position.get_int_y(), text.c_str(), static_cast<int>(text.length()));
 
-		// »Ö¸´¾É×ÖÌå²¢É¾³ıĞÂ×ÖÌå
-		SelectObject(hdc, hOldFont);
-		DeleteObject(hFont);
+		// å­—ä½“ä¼šåœ¨ RAII ææ„æ—¶è‡ªåŠ¨é‡Šæ”¾ï¼›SelectObject ä¹Ÿä¼šè‡ªåŠ¨è¿˜åŸ
 	}
 
 private:
 	/**
-	 * @brief													: Ê¹ÓÃÍ¼±ê»æÖÆÖ±Ïß
+	 * @brief													: ä½¿ç”¨å›¾æ ‡ç»˜åˆ¶ç›´çº¿
 	 */
 	void drawLineWithIcons(const POINT_2D& start, const POINT_2D& end)
 	{
@@ -741,7 +782,7 @@ private:
 	}
 
 	/**
-	 * @brief													: ¹æ·¶»¯½Ç¶Èµ½ [0, 2¦Ğ) ·¶Î§
+	 * @brief													: è§„èŒƒåŒ–è§’åº¦åˆ° [0, 2Ï€) èŒƒå›´
 	 */
 	void normalizeAngle()
 	{
@@ -750,7 +791,7 @@ private:
 	}
 
 public:
-	// Getter ºÍ Setter ·½·¨
+	// Getter å’Œ Setter æ–¹æ³•
 	int getStartPosX() const { return position.get_int_x(); }
 	int getStartPosY() const { return position.get_int_y(); }
 
@@ -767,7 +808,7 @@ public:
 	void setPenStatus(bool newPStatus) { penState = newPStatus; }
 	void changeIcon(HICON newIcon) { icon = newIcon; }
 
-	float getAngle() const { return angle * 180.0f / PI; } // ·µ»Ø½Ç¶ÈÖÆ
+	float getAngle() const { return angle * 180.0f / PI; } // è¿”å›è§’åº¦åˆ¶
 	void setAngle(float degrees)
 	{
 		angle = degrees * (PI / 180.0f);
@@ -775,23 +816,23 @@ public:
 	}
 
 	/**
-	 * @brief													: ÉèÖÃÌî³äÃÜ¶È
-	 * @param[in]		density									: Ìî³äÃÜ¶È£¨Í¼±ê¼ä¾à£©
+	 * @brief													: è®¾ç½®å¡«å……å¯†åº¦
+	 * @param[in]		density									: å¡«å……å¯†åº¦ï¼ˆå›¾æ ‡é—´è·ï¼‰
 	 */
 	void setFillDensity(int density) {
 		fillDensity = (density > 0) ? density : 15;
 	}
 
 	/**
-	 * @brief													: »ñÈ¡Ìî³äÃÜ¶È
-	 * @return													: µ±Ç°Ìî³äÃÜ¶È
+	 * @brief													: è·å–å¡«å……å¯†åº¦
+	 * @return													: å½“å‰å¡«å……å¯†åº¦
 	 */
 	int getFillDensity() const {
 		return fillDensity;
 	}
 
 	/**
-	 * @brief													: »æÖÆÍ¼±ê
+	 * @brief													: ç»˜åˆ¶å›¾æ ‡
 	 */
 	void DrawIcon(int x, int y) const
 	{
@@ -822,7 +863,7 @@ public:
 	}
 
 	/**
-	 * @brief													: Çå³ı»­²¼
+	 * @brief													: æ¸…é™¤ç”»å¸ƒ
 	 */
 	void clearCanvas() const
 	{
@@ -834,16 +875,19 @@ public:
 	}
 
 	/**
-	 * @brief													: »ñÈ¡Ìî³ä×´Ì¬
-	 * @return													: ÊÇ·ñÕıÔÚÌî³ä
+	 * @brief													: è·å–å¡«å……çŠ¶æ€
+	 * @return													: æ˜¯å¦æ­£åœ¨å¡«å……
 	 */
 	bool getFillStatus() const { return isFilling; }
 };
 
+// å…¼å®¹æ—§ä»£ç ï¼šä¹‹å‰çš„ç±»åå« IconDrawer
+using IconDrawer = Pen;
+
 /**
- * @brief														: ¼ÓÔØÍ¼±ê×ÊÔ´
+ * @brief														: åŠ è½½å›¾æ ‡èµ„æº
  */
-HICON loadCustomIcon(HINSTANCE hInstance, LPCTSTR resourceName)
+inline HICON loadCustomIcon(HINSTANCE hInstance, LPCTSTR resourceName)
 {
 	return LoadIcon(hInstance, resourceName);
 }

@@ -9,7 +9,7 @@ LRESULT CALLBACK MyWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         HDC hdc = BeginPaint(hWnd, &ps);
 
         // 创建绘图器对象
-        IconDrawer drawer(hdc, NULL);
+        Pen drawer(hdc, NULL);
 
         // 设置绘制参数
         drawer.setSensitivity(5);

@@ -1,4 +1,4 @@
-// layeredTextout.hpp
+ï»¿// layeredTextout.hpp
 #pragma once
 
 #include <windows.h>
@@ -9,87 +9,91 @@
 #include <memory>
 #include <chrono>
 #include <algorithm>
+#include <cstdint>
 
-#define PI 3.14159265358979323846f
+#include "gdi_raii.hpp"
 
-// 3D±ä»»²ÎÊı½á¹¹Ìå
+// è¯´æ˜ï¼šä¸è¦åœ¨å¤´æ–‡ä»¶é‡Œå®šä¹‰é€šç”¨å®ï¼ˆå¦‚ PIï¼‰ã€‚
+// åŸå› ï¼šå®ä¼šâ€œæ±¡æŸ“â€åç»­åŒ…å«çš„æ‰€æœ‰æ–‡ä»¶ï¼Œå¯¼è‡´éš¾ä»¥æ’æŸ¥çš„å‘½åå†²çªã€‚
+
+// 3Då˜æ¢å‚æ•°ç»“æ„ä½“
 struct Transform3D {
-    float rotationX = 0.0f;    // XÖáĞı×ª½Ç¶È(»¡¶È)
-    float rotationY = 0.0f;    // YÖáĞı×ª½Ç¶È(»¡¶È)  
-    float rotationZ = 0.0f;    // ZÖáĞı×ª½Ç¶È(»¡¶È)
-    float scaleX = 1.0f;       // XÖáËõ·Å
-    float scaleY = 1.0f;       // YÖáËõ·Å
-    float scaleZ = 1.0f;       // ZÖáËõ·Å
-    float translateX = 0.0f;   // XÖáÆ½ÒÆ
-    float translateY = 0.0f;   // YÖáÆ½ÒÆ
-    float translateZ = 0.0f;   // ZÖáÆ½ÒÆ
-    float perspective = 0.001f; // Í¸ÊÓÇ¿¶È
+    float rotationX = 0.0f;    // Xè½´æ—‹è½¬è§’åº¦(å¼§åº¦)
+    float rotationY = 0.0f;    // Yè½´æ—‹è½¬è§’åº¦(å¼§åº¦)  
+    float rotationZ = 0.0f;    // Zè½´æ—‹è½¬è§’åº¦(å¼§åº¦)
+    float scaleX = 1.0f;       // Xè½´ç¼©æ”¾
+    float scaleY = 1.0f;       // Yè½´ç¼©æ”¾
+    float scaleZ = 1.0f;       // Zè½´ç¼©æ”¾
+    float translateX = 0.0f;   // Xè½´å¹³ç§»
+    float translateY = 0.0f;   // Yè½´å¹³ç§»
+    float translateZ = 0.0f;   // Zè½´å¹³ç§»
+    float perspective = 0.001f; // é€è§†å¼ºåº¦
 };
 
-// ÎÄ×ÖÑùÊ½½á¹¹Ìå
+// æ–‡å­—æ ·å¼ç»“æ„ä½“
 struct TextStyle {
-    int fontSize = 36;                    // ×ÖÌå´óĞ¡
-    float widthScale = 1.0f;              // ¿í¶ÈËõ·Å±ÈÀı£¨¿í±âĞ§¹û£©
-    float heightScale = 1.0f;             // ¸ß¶ÈËõ·Å±ÈÀı
-    float charSpacing = 1.0f;             // ×Ö·û¼ä¾à
-    bool enableStretch = false;           // ÊÇ·ñÆôÓÃÀ­Éì
-    float stretchIntensity = 1.0f;        // À­ÉìÇ¿¶È
-    std::wstring fontFamily = L"Î¢ÈíÑÅºÚ"; // ×ÖÌå¼Ò×å
-    int fontWeight = FW_BOLD;             // ×ÖÌå´ÖÏ¸
+    int fontSize = 36;                    // å­—ä½“å¤§å°
+    float widthScale = 1.0f;              // å®½åº¦ç¼©æ”¾æ¯”ä¾‹ï¼ˆå®½æ‰æ•ˆæœï¼‰
+    float heightScale = 1.0f;             // é«˜åº¦ç¼©æ”¾æ¯”ä¾‹
+    float charSpacing = 1.0f;             // å­—ç¬¦é—´è·
+    bool enableStretch = false;           // æ˜¯å¦å¯ç”¨æ‹‰ä¼¸
+    float stretchIntensity = 1.0f;        // æ‹‰ä¼¸å¼ºåº¦
+    std::wstring fontFamily = L"å¾®è½¯é›…é»‘"; // å­—ä½“å®¶æ—
+    int fontWeight = FW_BOLD;             // å­—ä½“ç²—ç»†
 };
 
-// ¶¯Ì¬½¥±ä²ÎÊı½á¹¹Ìå
+// åŠ¨æ€æ¸å˜å‚æ•°ç»“æ„ä½“
 struct DynamicGradientParams {
-    COLORREF startColor = RGB(255, 0, 0);     // ÆğÊ¼ÑÕÉ«
-    COLORREF endColor = RGB(0, 0, 255);       // ½áÊøÑÕÉ«
-    COLORREF solidColor = RGB(255, 255, 255); // ´¿É«Ä£Ê½ÑÕÉ«
-    float gradientSpeed = 1.0f;               // ½¥±äËÙ¶È
-    bool useRainbow = true;                   // ÊÇ·ñÊ¹ÓÃ²ÊºçÉ«
-    bool useSolidColor = false;               // ÊÇ·ñÊ¹ÓÃ´¿É«
-    float time = 0.0f;                        // Ê±¼äÀÛ»ı
+    COLORREF startColor = RGB(255, 0, 0);     // èµ·å§‹é¢œè‰²
+    COLORREF endColor = RGB(0, 0, 255);       // ç»“æŸé¢œè‰²
+    COLORREF solidColor = RGB(255, 255, 255); // çº¯è‰²æ¨¡å¼é¢œè‰²
+    float gradientSpeed = 1.0f;               // æ¸å˜é€Ÿåº¦
+    bool useRainbow = true;                   // æ˜¯å¦ä½¿ç”¨å½©è™¹è‰²
+    bool useSolidColor = false;               // æ˜¯å¦ä½¿ç”¨çº¯è‰²
+    float time = 0.0f;                        // æ—¶é—´ç´¯ç§¯
 };
 
-// ÂË¾µĞ§¹û²ÎÊı
+// æ»¤é•œæ•ˆæœå‚æ•°
 struct FilterEffects {
-    // Å¤ÇúĞ§¹û
-    bool enableFishEye = false;               // ÓãÑÛĞ§¹û
-    float fishEyeStrength = 0.5f;             // ÓãÑÛÇ¿¶È
-    float fishEyeRadius = 200.0f;             // ÓãÑÛ°ë¾¶
-    float fishEyeProgress = 0.0f;             // ÓãÑÛ½ø¶È£¨0-1£©
+    // æ‰­æ›²æ•ˆæœ
+    bool enableFishEye = false;               // é±¼çœ¼æ•ˆæœ
+    float fishEyeStrength = 0.5f;             // é±¼çœ¼å¼ºåº¦
+    float fishEyeRadius = 200.0f;             // é±¼çœ¼åŠå¾„
+    float fishEyeProgress = 0.0f;             // é±¼çœ¼è¿›åº¦ï¼ˆ0-1ï¼‰
 
-    bool enableTwirl = false;                 // äöÎĞÅ¤Çú
-    float twirlStrength = 1.0f;               // äöÎĞÇ¿¶È
-    float twirlRadius = 300.0f;               // äöÎĞ°ë¾¶
-    float twirlProgress = 0.0f;               // äöÎĞ½ø¶È
+    bool enableTwirl = false;                 // æ¼©æ¶¡æ‰­æ›²
+    float twirlStrength = 1.0f;               // æ¼©æ¶¡å¼ºåº¦
+    float twirlRadius = 300.0f;               // æ¼©æ¶¡åŠå¾„
+    float twirlProgress = 0.0f;               // æ¼©æ¶¡è¿›åº¦
 
-    bool enableWave = false;                  // ²¨ÀËÅ¤Çú
-    float waveAmplitudeX = 10.0f;             // XÖá²¨ÀË·ù¶È
-    float waveAmplitudeY = 5.0f;              // YÖá²¨ÀË·ù¶È
-    float waveFrequencyX = 0.05f;             // XÖá²¨ÀËÆµÂÊ
-    float waveFrequencyY = 0.03f;             // YÖá²¨ÀËÆµÂÊ
+    bool enableWave = false;                  // æ³¢æµªæ‰­æ›²
+    float waveAmplitudeX = 10.0f;             // Xè½´æ³¢æµªå¹…åº¦
+    float waveAmplitudeY = 5.0f;              // Yè½´æ³¢æµªå¹…åº¦
+    float waveFrequencyX = 0.05f;             // Xè½´æ³¢æµªé¢‘ç‡
+    float waveFrequencyY = 0.03f;             // Yè½´æ³¢æµªé¢‘ç‡
 
-    // ÏñËØĞ§¹û
-    bool enablePixelate = false;              // ÏñËØ»¯
-    int pixelSize = 8;                        // ÏñËØ´óĞ¡
+    // åƒç´ æ•ˆæœ
+    bool enablePixelate = false;              // åƒç´ åŒ–
+    int pixelSize = 8;                        // åƒç´ å¤§å°
 
-    // ÑÕÉ«Ğ§¹û
-    bool enableInvert = false;                // ÑÕÉ«·´×ª
-    bool enableGrayscale = false;             // »Ò¶È»¯
-    float contrast = 1.0f;                    // ¶Ô±È¶È
-    float brightness = 0.0f;                  // ÁÁ¶È
+    // é¢œè‰²æ•ˆæœ
+    bool enableInvert = false;                // é¢œè‰²åè½¬
+    bool enableGrayscale = false;             // ç°åº¦åŒ–
+    float contrast = 1.0f;                    // å¯¹æ¯”åº¦
+    float brightness = 0.0f;                  // äº®åº¦
 };
 
-// ¶¯»­Ê±ÖÓÏµÍ³
+// åŠ¨ç”»æ—¶é’Ÿç³»ç»Ÿ
 struct AnimationClock {
-    float globalTime = 0.0f;                  // È«¾ÖÊ±¼ä
-    float speed = 1.0f;                       // Ê±¼äËÙ¶È
-    bool paused = false;                      // ÊÇ·ñÔİÍ£
+    float globalTime = 0.0f;                  // å…¨å±€æ—¶é—´
+    float speed = 1.0f;                       // æ—¶é—´é€Ÿåº¦
+    bool paused = false;                      // æ˜¯å¦æš‚åœ
 
-    // ¶¯»­²ÎÊı
-    float waveTime = 0.0f;                    // ²¨ÀË¶¯»­Ê±¼ä
-    float pulseTime = 0.0f;                   // Âö³å¶¯»­Ê±¼ä
-    float rotationTime = 0.0f;                // Ğı×ª¶¯»­Ê±¼ä
-    float stretchTime = 0.0f;                 // À­Éì¶¯»­Ê±¼ä
+    // åŠ¨ç”»å‚æ•°
+    float waveTime = 0.0f;                    // æ³¢æµªåŠ¨ç”»æ—¶é—´
+    float pulseTime = 0.0f;                   // è„‰å†²åŠ¨ç”»æ—¶é—´
+    float rotationTime = 0.0f;                // æ—‹è½¬åŠ¨ç”»æ—¶é—´
+    float stretchTime = 0.0f;                 // æ‹‰ä¼¸åŠ¨ç”»æ—¶é—´
 
     void Update(float deltaTime) {
         if (!paused) {
@@ -120,24 +124,48 @@ private:
     bool isVisible_ = false;
     int windowX_ = 0;
     int windowY_ = 0;
-    BYTE alpha_ = 255;  // Í¸Ã÷¶È (0-255)
+    BYTE alpha_ = 255;  // é€æ˜åº¦ (0-255)
 
-    // ¿Éµ÷½Ú²ÎÊı
+    // å¯è°ƒèŠ‚å‚æ•°
     Transform3D transform3D_;
     TextStyle textStyle_;
     DynamicGradientParams colorParams_;
     FilterEffects filterEffects_;
     AnimationClock animationClock_;
-    std::wstring text_ = L"¸ßĞÔÄÜÎÄ×ÖĞ§¹û";
+    std::wstring text_ = L"é«˜æ€§èƒ½æ–‡å­—æ•ˆæœ";
 
-    // ¶¯»­Ïà¹Ø
+    // åŠ¨ç”»ç›¸å…³
     std::chrono::steady_clock::time_point lastUpdateTime_;
     bool useAnimation_ = true;
 
-    // GDI×ÊÔ´
-    HDC memDC_ = nullptr;
-    HBITMAP memBmp_ = nullptr;
-    HBITMAP oldBmp_ = nullptr;
+    // ====================== GDIèµ„æºï¼ˆRAII + view å¥æŸ„ï¼‰ ======================
+    // è¯´æ˜ï¼š
+    // - ownerï¼šè´Ÿè´£é‡Šæ”¾ï¼ˆRAIIï¼‰
+    // - viewï¼šç»™ä¸‹æ–¹ä»£ç ç”¨çš„â€œè£¸å¥æŸ„â€ï¼ˆä¸è¦æ‰‹åŠ¨ Delete/Releaseï¼‰
+
+    evgdi::win::unique_hdc memDcOwner_;
+    evgdi::win::unique_hbitmap memBmpOwner_;
+    evgdi::win::select_object_guard memBmpSel_;
+    HDC memDC_ = nullptr;               // view
+    HBITMAP memBmp_ = nullptr;          // view
+    void* dibBits_ = nullptr;           // DIB åƒç´ æŒ‡é’ˆï¼ˆ32bppï¼ŒBGRAï¼Œé¡¶å‘ä¸‹ï¼‰
+
+    evgdi::win::unique_hdc tempDcOwner_;
+    evgdi::win::unique_hbitmap tempBmpOwner_;
+    evgdi::win::select_object_guard tempBmpSel_;
+    HDC tempDC_ = nullptr;              // view
+    HBITMAP tempBmp_ = nullptr;         // view
+    void* tempBits_ = nullptr;
+
+    evgdi::win::unique_hbrush bgBrushOwner_;
+    HBRUSH bgBrush_ = nullptr;          // view
+
+    evgdi::win::unique_hfont cachedFontOwner_;
+    HFONT cachedFont_ = nullptr;        // view
+    int cachedFontWidth_ = 0;
+    int cachedFontHeight_ = 0;
+    int cachedFontWeight_ = 0;
+    std::wstring cachedFontFamily_;
 
 public:
     LayeredTextOut() {
@@ -151,7 +179,7 @@ public:
 
     HWND GetHWND() const { return hwnd_; }
 
-    // === ÎÄ×ÖÑùÊ½¿ØÖÆ ===
+    // === æ–‡å­—æ ·å¼æ§åˆ¶ ===
     void SetFontSize(int size) {
         textStyle_.fontSize = size;
         UpdateWindowContent();
@@ -195,7 +223,7 @@ public:
         UpdateWindowContent();
     }
 
-    // ¿ìËÙÉèÖÃ¿í±âĞ§¹û
+    // å¿«é€Ÿè®¾ç½®å®½æ‰æ•ˆæœ
     void SetWideFlatEffect(bool enable, float widthScale = 1.5f, float heightScale = 0.8f) {
         if (enable) {
             textStyle_.widthScale = widthScale;
@@ -210,7 +238,7 @@ public:
         UpdateWindowContent();
     }
 
-    // ¶¯Ì¬¿í±â¶¯»­
+    // åŠ¨æ€å®½æ‰åŠ¨ç”»
     void EnableDynamicStretch(bool enable, float speed = 2.0f) {
         if (enable) {
             textStyle_.enableStretch = true;
@@ -243,7 +271,7 @@ public:
         UpdateWindowContent();
     }
 
-    // === 3D±ä»»¿ØÖÆ·½·¨ ===
+    // === 3Då˜æ¢æ§åˆ¶æ–¹æ³• ===
     void RotateX(float angle) { transform3D_.rotationX += angle; UpdateWindowContent(); }
     void RotateY(float angle) { transform3D_.rotationY += angle; UpdateWindowContent(); }
     void RotateZ(float angle) { transform3D_.rotationZ += angle; UpdateWindowContent(); }
@@ -277,7 +305,7 @@ public:
         UpdateWindowContent();
     }
 
-    // === ×ÖÌåºÍÎÄ×Ö¿ØÖÆ ===
+    // === å­—ä½“å’Œæ–‡å­—æ§åˆ¶ ===
     void IncreaseFontSize(int increment = 2) {
         textStyle_.fontSize += increment;
         if (textStyle_.fontSize > 200) textStyle_.fontSize = 200;
@@ -299,7 +327,7 @@ public:
         UpdateWindowContent();
     }
 
-    // === ¶¯Ì¬½¥±ä¿ØÖÆ ===
+    // === åŠ¨æ€æ¸å˜æ§åˆ¶ ===
     void SetDynamicGradientSpeed(float speed) { colorParams_.gradientSpeed = speed; }
     void SetRainbowMode(bool enable) {
         colorParams_.useRainbow = enable;
@@ -326,7 +354,7 @@ public:
         UpdateWindowContent();
     }
 
-    // === Í¸Ã÷¶È¿ØÖÆ ===
+    // === é€æ˜åº¦æ§åˆ¶ ===
     void SetAlpha(BYTE alpha) {
         alpha_ = alpha;
         UpdateWindowContent();
@@ -340,7 +368,7 @@ public:
         UpdateWindowContent();
     }
 
-    // === ´°¿ÚÎ»ÖÃ¿ØÖÆ ===
+    // === çª—å£ä½ç½®æ§åˆ¶ ===
     void SetWindowPosition(int x, int y) {
         windowX_ = x;
         windowY_ = y;
@@ -361,8 +389,8 @@ public:
         SetWindowPosition((screenWidth - width_) / 2, (screenHeight - height_) / 2);
     }
 
-    // === ÂË¾µĞ§¹û¿ØÖÆ ===
-    // Å¤ÇúĞ§¹û - Ê¹ÓÃPlgBltÊµÏÖ¸ßĞÔÄÜ
+    // === æ»¤é•œæ•ˆæœæ§åˆ¶ ===
+    // æ‰­æ›²æ•ˆæœ - ä½¿ç”¨PlgBltå®ç°é«˜æ€§èƒ½
     void EnableFishEye(bool enable, float strength = 0.5f, bool instant = false) {
         filterEffects_.enableFishEye = enable;
         filterEffects_.fishEyeStrength = strength;
@@ -400,14 +428,14 @@ public:
         UpdateWindowContent();
     }
 
-    // ÏñËØĞ§¹û
+    // åƒç´ æ•ˆæœ
     void EnablePixelate(bool enable, int size = 8) {
         filterEffects_.enablePixelate = enable;
         filterEffects_.pixelSize = size;
         UpdateWindowContent();
     }
 
-    // ÑÕÉ«Ğ§¹û
+    // é¢œè‰²æ•ˆæœ
     void EnableInvert(bool enable) {
         filterEffects_.enableInvert = enable;
         UpdateWindowContent();
@@ -428,13 +456,13 @@ public:
         UpdateWindowContent();
     }
 
-    // ÖØÖÃËùÓĞÂË¾µ
+    // é‡ç½®æ‰€æœ‰æ»¤é•œ
     void ResetFilters() {
         filterEffects_ = FilterEffects();
         UpdateWindowContent();
     }
 
-    // === ¶¯»­Ê±ÖÓ¿ØÖÆ ===
+    // === åŠ¨ç”»æ—¶é’Ÿæ§åˆ¶ ===
     void SetAnimationSpeed(float speed) { animationClock_.speed = speed; }
     void PauseAnimation(bool pause) { animationClock_.paused = pause; }
     void ResetAnimationClock() { animationClock_.Reset(); }
@@ -453,7 +481,7 @@ public:
         lastUpdateTime_ = std::chrono::steady_clock::now();
     }
 
-    // === »ñÈ¡µ±Ç°²ÎÊı ===
+    // === è·å–å½“å‰å‚æ•° ===
     Transform3D GetTransform3D() const { return transform3D_; }
     TextStyle GetTextStyle() const { return textStyle_; }
     DynamicGradientParams GetColorParams() const { return colorParams_; }
@@ -462,7 +490,7 @@ public:
     BYTE GetAlpha() const { return alpha_; }
     std::wstring GetText() const { return text_; }
 
-    // Ô­ÓĞ»ù´¡·½·¨
+    // åŸæœ‰åŸºç¡€æ–¹æ³•
     bool Create(int width = 800, int height = 600) {
         width_ = width;
         height_ = height;
@@ -487,13 +515,44 @@ public:
             windowX_, windowY_, width_, height_, NULL, NULL, GetModuleHandle(NULL), this
         );
 
-        // ³õÊ¼»¯GDI×ÊÔ´
+        // åˆå§‹åŒ–GDIèµ„æº
         if (hwnd_) {
-            HDC screenDC = GetDC(NULL);
-            memDC_ = CreateCompatibleDC(screenDC);
-            memBmp_ = CreateCompatibleBitmap(screenDC, width_, height_);
-            oldBmp_ = (HBITMAP)SelectObject(memDC_, memBmp_);
-            ReleaseDC(NULL, screenDC);
+            evgdi::win::window_dc screenDC(nullptr);
+            if (!screenDC) return false;
+
+            memDcOwner_.reset(CreateCompatibleDC(screenDC.get()));
+            memDC_ = memDcOwner_.get();
+            if (!memDC_) return false;
+
+            // ä½¿ç”¨ DIBSectionï¼šåƒç´ å¤„ç†ç›´æ¥è¯»å†™å†…å­˜ï¼Œæ¯” GetPixel/SetPixel å¿«å‡ ä¸ªæ•°é‡çº§
+            BITMAPINFO bmi{};
+            bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+            bmi.bmiHeader.biWidth = width_;
+            bmi.bmiHeader.biHeight = -height_;      // è´Ÿæ•°ï¼šé¡¶å‘ä¸‹ï¼ˆy é€’å¢å°±æ˜¯å¾€ä¸‹ï¼‰
+            bmi.bmiHeader.biPlanes = 1;
+            bmi.bmiHeader.biBitCount = 32;
+            bmi.bmiHeader.biCompression = BI_RGB;
+
+            memBmpOwner_.reset(CreateDIBSection(screenDC.get(), &bmi, DIB_RGB_COLORS, &dibBits_, nullptr, 0));
+            memBmp_ = memBmpOwner_.get();
+            if (!memBmp_) return false;
+            memBmpSel_ = evgdi::win::select_object_guard(memDC_, memBmp_);
+
+            // èƒŒæ™¯åˆ·å­åªåˆ›å»ºä¸€æ¬¡ï¼Œåç»­å¤ç”¨ï¼ˆSetBackgroundColor ä¼šæ›´æ–°ï¼‰
+            if (!bgBrush_) {
+                bgBrushOwner_.reset(CreateSolidBrush(bgColor_));
+                bgBrush_ = bgBrushOwner_.get();
+            }
+
+            // PlgBlt ä¸´æ—¶ç¼“å†²ï¼šåªåˆ›å»ºä¸€æ¬¡ï¼Œåç»­å¤ç”¨
+            tempDcOwner_.reset(CreateCompatibleDC(screenDC.get()));
+            tempDC_ = tempDcOwner_.get();
+            if (!tempDC_) return false;
+
+            tempBmpOwner_.reset(CreateDIBSection(screenDC.get(), &bmi, DIB_RGB_COLORS, &tempBits_, nullptr, 0));
+            tempBmp_ = tempBmpOwner_.get();
+            if (!tempBmp_) return false;
+            tempBmpSel_ = evgdi::win::select_object_guard(tempDC_, tempBmp_);
             return true;
         }
 
@@ -524,6 +583,8 @@ public:
 
     void SetBackgroundColor(COLORREF color) {
         bgColor_ = color;
+        bgBrushOwner_.reset(CreateSolidBrush(bgColor_));
+        bgBrush_ = bgBrushOwner_.get();
         UpdateWindowContent();
     }
 
@@ -533,13 +594,36 @@ public:
             height_ = height;
             SetWindowPos(hwnd_, NULL, 0, 0, width_, height_, SWP_NOMOVE | SWP_NOZORDER);
 
-            // ÖØĞÂ´´½¨GDI×ÊÔ´
+            // é‡æ–°åˆ›å»ºGDIèµ„æº
             CleanupGDI();
-            HDC screenDC = GetDC(NULL);
-            memDC_ = CreateCompatibleDC(screenDC);
-            memBmp_ = CreateCompatibleBitmap(screenDC, width_, height_);
-            oldBmp_ = (HBITMAP)SelectObject(memDC_, memBmp_);
-            ReleaseDC(NULL, screenDC);
+            evgdi::win::window_dc screenDC(nullptr);
+            if (!screenDC) return;
+
+            memDcOwner_.reset(CreateCompatibleDC(screenDC.get()));
+            memDC_ = memDcOwner_.get();
+            if (!memDC_) return;
+
+            BITMAPINFO bmi{};
+            bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+            bmi.bmiHeader.biWidth = width_;
+            bmi.bmiHeader.biHeight = -height_;
+            bmi.bmiHeader.biPlanes = 1;
+            bmi.bmiHeader.biBitCount = 32;
+            bmi.bmiHeader.biCompression = BI_RGB;
+
+            memBmpOwner_.reset(CreateDIBSection(screenDC.get(), &bmi, DIB_RGB_COLORS, &dibBits_, nullptr, 0));
+            memBmp_ = memBmpOwner_.get();
+            if (!memBmp_) return;
+            memBmpSel_ = evgdi::win::select_object_guard(memDC_, memBmp_);
+
+            tempDcOwner_.reset(CreateCompatibleDC(screenDC.get()));
+            tempDC_ = tempDcOwner_.get();
+            if (!tempDC_) return;
+
+            tempBmpOwner_.reset(CreateDIBSection(screenDC.get(), &bmi, DIB_RGB_COLORS, &tempBits_, nullptr, 0));
+            tempBmp_ = tempBmpOwner_.get();
+            if (!tempBmp_) return;
+            tempBmpSel_ = evgdi::win::select_object_guard(tempDC_, tempBmp_);
 
             UpdateWindowContent();
         }
@@ -548,26 +632,26 @@ public:
     void UpdateWindowContent() {
         if (!hwnd_ || !isVisible_ || !memDC_) return;
 
-        // ¸üĞÂÊ±¼äÏµÍ³
+        // æ›´æ–°æ—¶é—´ç³»ç»Ÿ
         if (useAnimation_) {
             auto currentTime = std::chrono::steady_clock::now();
             auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
                 currentTime - lastUpdateTime_);
             float deltaTime = elapsed.count() * 0.001f;
 
-            // ¸üĞÂËùÓĞÊ±¼äÖá
+            // æ›´æ–°æ‰€æœ‰æ—¶é—´è½´
             colorParams_.time += deltaTime * colorParams_.gradientSpeed;
             animationClock_.Update(deltaTime);
 
-            // ¶¯Ì¬À­ÉìĞ§¹û
+            // åŠ¨æ€æ‹‰ä¼¸æ•ˆæœ
             if (textStyle_.enableStretch) {
-                // ¸ù¾İÊ±¼ä¶¯Ì¬µ÷Õû¿í±âĞ§¹û£¬ÔöÇ¿3D¸Ğ
+                // æ ¹æ®æ—¶é—´åŠ¨æ€è°ƒæ•´å®½æ‰æ•ˆæœï¼Œå¢å¼º3Dæ„Ÿ
                 float stretchWave = sin(animationClock_.stretchTime * 2.0f) * 0.2f + 1.0f;
                 textStyle_.widthScale = 1.2f * stretchWave * textStyle_.stretchIntensity;
                 textStyle_.heightScale = 0.9f / stretchWave * textStyle_.stretchIntensity;
             }
 
-            // ½¥½øÊ½ÂË¾µĞ§¹û
+            // æ¸è¿›å¼æ»¤é•œæ•ˆæœ
             if (filterEffects_.enableFishEye) {
                 filterEffects_.fishEyeProgress = (std::min)(1.0f, filterEffects_.fishEyeProgress + deltaTime * 2.0f);
             }
@@ -585,60 +669,61 @@ public:
             lastUpdateTime_ = currentTime;
         }
 
-        // »æÖÆ»ù´¡ÄÚÈİ
+        // ç»˜åˆ¶åŸºç¡€å†…å®¹
         RECT rect = { 0, 0, width_, height_ };
-        HBRUSH bgBrush = CreateSolidBrush(bgColor_);
-        FillRect(memDC_, &rect, bgBrush);
+        if (!bgBrush_) {
+            bgBrushOwner_.reset(CreateSolidBrush(bgColor_));
+            bgBrush_ = bgBrushOwner_.get();
+        }
+        FillRect(memDC_, &rect, bgBrush_);
         Draw3DText(memDC_);
 
-        // Ó¦ÓÃ¸ßĞÔÄÜÂË¾µĞ§¹û
+        // åº”ç”¨é«˜æ€§èƒ½æ»¤é•œæ•ˆæœ
         ApplyHighPerformanceEffects();
 
-        // ¸üĞÂµ½·Ö²ã´°¿Ú
+        // æ›´æ–°åˆ°åˆ†å±‚çª—å£
         UpdateLayeredWindowContent();
-
-        DeleteObject(bgBrush);
     }
 
 private:
     void CleanupGDI() {
-        if (memDC_ && oldBmp_) {
-            SelectObject(memDC_, oldBmp_);
-            oldBmp_ = nullptr;
-        }
-        if (memBmp_) {
-            DeleteObject(memBmp_);
-            memBmp_ = nullptr;
-        }
-        if (memDC_) {
-            DeleteDC(memDC_);
-            memDC_ = nullptr;
-        }
+        memBmpSel_.reset();
+        memBmpOwner_.reset();
+        memDcOwner_.reset();
+        memBmp_ = nullptr;
+        memDC_ = nullptr;
+        dibBits_ = nullptr;
+
+        tempBmpSel_.reset();
+        tempBmpOwner_.reset();
+        tempDcOwner_.reset();
+        tempBmp_ = nullptr;
+        tempDC_ = nullptr;
+        tempBits_ = nullptr;
     }
 
     void UpdateLayeredWindowContent() {
         if (!hwnd_ || !memDC_) return;
 
-        HDC screenDC = GetDC(NULL);
+        evgdi::win::window_dc screenDC(nullptr);
+        if (!screenDC) return;
         POINT ptSrc = { 0, 0 };
         SIZE size = { width_, height_ };
         BLENDFUNCTION blend = { AC_SRC_OVER, 0, alpha_, AC_SRC_ALPHA };
         POINT dstPoint = { windowX_, windowY_ };
 
-        UpdateLayeredWindow(hwnd_, screenDC, &dstPoint, &size, memDC_, &ptSrc,
+        UpdateLayeredWindow(hwnd_, screenDC.get(), &dstPoint, &size, memDC_, &ptSrc,
             RGB(0, 0, 0), &blend, ULW_COLORKEY);
-
-        ReleaseDC(NULL, screenDC);
     }
 
-    // 3D±ä»»¼ÆËã
+    // 3Då˜æ¢è®¡ç®—
     void TransformPoint(float& x, float& y, float& z) const {
-        // Ó¦ÓÃËõ·Å
+        // åº”ç”¨ç¼©æ”¾
         x *= transform3D_.scaleX;
         y *= transform3D_.scaleY;
         z *= transform3D_.scaleZ;
 
-        // Ó¦ÓÃĞı×ª
+        // åº”ç”¨æ—‹è½¬
         float cosX = cos(transform3D_.rotationX);
         float sinX = sin(transform3D_.rotationX);
         float cosY = cos(transform3D_.rotationY);
@@ -646,17 +731,17 @@ private:
         float cosZ = cos(transform3D_.rotationZ);
         float sinZ = sin(transform3D_.rotationZ);
 
-        // ZÖáĞı×ª
+        // Zè½´æ—‹è½¬
         float x1 = x * cosZ - y * sinZ;
         float y1 = x * sinZ + y * cosZ;
         float z1 = z;
 
-        // YÖáĞı×ª
+        // Yè½´æ—‹è½¬
         float x2 = x1 * cosY + z1 * sinY;
         float y2 = y1;
         float z2 = -x1 * sinY + z1 * cosY;
 
-        // XÖáĞı×ª
+        // Xè½´æ—‹è½¬
         float x3 = x2;
         float y3 = y2 * cosX - z2 * sinX;
         float z3 = y2 * sinX + z2 * cosX;
@@ -666,20 +751,20 @@ private:
         z = z3 + transform3D_.translateZ;
     }
 
-    // Í¸ÊÓÍ¶Ó°
+    // é€è§†æŠ•å½±
     void ProjectPoint(float x, float y, float z, int& screenX, int& screenY) const {
         float factor = 1.0f / (1.0f + z * transform3D_.perspective);
         screenX = static_cast<int>(x * factor + width_ / 2);
         screenY = static_cast<int>(y * factor + height_ / 2);
     }
 
-    // ¶¯Ì¬½¥±äÉ«¼ÆËã
+    // åŠ¨æ€æ¸å˜è‰²è®¡ç®—
     COLORREF CalculateDynamicGradient(float charIndex, float totalChars) const {
         if (colorParams_.useSolidColor) {
             return colorParams_.solidColor;
         }
         else if (colorParams_.useRainbow) {
-            // ²ÊºçÉ«¶¯Ì¬½¥±ä - »ùÓÚÊ±¼äºÍ×Ö·ûÎ»ÖÃ
+            // å½©è™¹è‰²åŠ¨æ€æ¸å˜ - åŸºäºæ—¶é—´å’Œå­—ç¬¦ä½ç½®
             float hue = colorParams_.time + charIndex / totalChars * 0.3f;
             hue = fmod(hue, 1.0f) * 6.28318f;
 
@@ -689,7 +774,7 @@ private:
             return RGB(r, g, b);
         }
         else {
-            // ×Ô¶¨ÒåÑÕÉ«¶¯Ì¬½¥±ä
+            // è‡ªå®šä¹‰é¢œè‰²åŠ¨æ€æ¸å˜
             float t = fmod(colorParams_.time + charIndex / totalChars * 0.2f, 1.0f);
             float wave = (sin(t * 6.28318f) + 1) * 0.5f;
 
@@ -701,47 +786,64 @@ private:
         }
     }
 
-    // ÑÕÉ«²åÖµ¸¨Öúº¯Êı
+    // é¢œè‰²æ’å€¼è¾…åŠ©å‡½æ•°
     int LerpColor(int start, int end, float t) const {
         return start + static_cast<int>(t * (end - start));
     }
 
-    // ´´½¨´øÀ­ÉìĞ§¹ûµÄ×ÖÌå
-    HFONT CreateStretchedFont() const {
-        // ¼ÆËãÀ­ÉìºóµÄ×ÖÌå³ß´ç
-        int stretchedWidth = static_cast<int>(textStyle_.fontSize * textStyle_.widthScale);
-        int stretchedHeight = static_cast<int>(textStyle_.fontSize * textStyle_.heightScale);
+    // åˆ›å»º/å¤ç”¨å¸¦æ‹‰ä¼¸æ•ˆæœçš„å­—ä½“ï¼ˆç¼“å­˜ï¼‰
+    HFONT EnsureStretchedFont() {
+        const int stretchedWidth = static_cast<int>(textStyle_.fontSize * textStyle_.widthScale);
+        const int stretchedHeight = static_cast<int>(textStyle_.fontSize * textStyle_.heightScale);
+        const int weight = textStyle_.fontWeight;
+        const std::wstring& family = textStyle_.fontFamily;
 
-        return CreateFontW(
-            stretchedHeight,                    // ×ÖÌå¸ß¶È
-            stretchedWidth,                     // ×ÖÌå¿í¶È£¨¿ØÖÆ¿í±âĞ§¹û£©
-            0,                                  // Ğı×ª½Ç¶È
-            0,                                  // ·½Ïò
-            textStyle_.fontWeight,              // ×ÖÌå´ÖÏ¸
-            FALSE,                              // Ğ±Ìå
-            FALSE,                              // ÏÂ»®Ïß
-            FALSE,                              // É¾³ıÏß
-            DEFAULT_CHARSET,                    // ×Ö·û¼¯
-            OUT_DEFAULT_PRECIS,                 // Êä³ö¾«¶È
-            CLIP_DEFAULT_PRECIS,                // ²Ã¼ô¾«¶È
-            DEFAULT_QUALITY,                    // Êä³öÖÊÁ¿
-            DEFAULT_PITCH | FF_DONTCARE,        // ×ÖÌåÏµÁĞ
-            textStyle_.fontFamily.c_str()       // ×ÖÌåÃû³Æ
-        );
+        if (cachedFont_ &&
+            stretchedWidth == cachedFontWidth_ &&
+            stretchedHeight == cachedFontHeight_ &&
+            weight == cachedFontWeight_ &&
+            family == cachedFontFamily_) {
+            return cachedFont_;
+        }
+
+        cachedFontOwner_.reset(CreateFontW(
+            stretchedHeight,                    // å­—ä½“é«˜åº¦
+            stretchedWidth,                     // å­—ä½“å®½åº¦ï¼ˆæ§åˆ¶å®½æ‰æ•ˆæœï¼‰
+            0,                                  // æ—‹è½¬è§’åº¦
+            0,                                  // æ–¹å‘
+            weight,                             // å­—ä½“ç²—ç»†
+            FALSE,                              // æ–œä½“
+            FALSE,                              // ä¸‹åˆ’çº¿
+            FALSE,                              // åˆ é™¤çº¿
+            DEFAULT_CHARSET,                    // å­—ç¬¦é›†
+            OUT_DEFAULT_PRECIS,                 // è¾“å‡ºç²¾åº¦
+            CLIP_DEFAULT_PRECIS,                // è£å‰ªç²¾åº¦
+            DEFAULT_QUALITY,                    // è¾“å‡ºè´¨é‡
+            DEFAULT_PITCH | FF_DONTCARE,        // å­—ä½“ç³»åˆ—
+            family.c_str()                      // å­—ä½“åç§°
+        ));
+        cachedFont_ = cachedFontOwner_.get();
+
+        cachedFontWidth_ = stretchedWidth;
+        cachedFontHeight_ = stretchedHeight;
+        cachedFontWeight_ = weight;
+        cachedFontFamily_ = family;
+        return cachedFont_;
     }
 
     void Draw3DText(HDC hdc) {
         SetBkMode(hdc, TRANSPARENT);
 
-        // ´´½¨´øÀ­ÉìĞ§¹ûµÄ×ÖÌå
-        HFONT hFont = CreateStretchedFont();
+        // å¤ç”¨ç¼“å­˜å­—ä½“ï¼ˆå¿…è¦æ—¶æ‰é‡å»ºï¼‰
+        HFONT hFont = EnsureStretchedFont();
+        if (!hFont) return;
         HFONT oldFont = (HFONT)SelectObject(hdc, hFont);
 
         const wchar_t* text = text_.c_str();
         size_t textLen = text_.length();
 
         for (size_t i = 0; i < textLen; i++) {
-            // 3DÎ»ÖÃ¼ÆËã - ¿¼ÂÇ×Ö·û¼ä¾à
+            // 3Dä½ç½®è®¡ç®— - è€ƒè™‘å­—ç¬¦é—´è·
             float x = (i - textLen / 2.0f) * (textStyle_.fontSize * 0.8f * textStyle_.charSpacing);
             float y = 0;
             float z = 0;
@@ -750,17 +852,17 @@ private:
             int screenX, screenY;
             ProjectPoint(x, y, z, screenX, screenY);
 
-            // Ê¹ÓÃ¶¯Ì¬½¥±äÉ«
+            // ä½¿ç”¨åŠ¨æ€æ¸å˜è‰²
             COLORREF color = CalculateDynamicGradient(static_cast<float>(i), static_cast<float>(textLen));
             SetTextColor(hdc, color);
 
             wchar_t ch[2] = { text[i], L'\0' };
 
-            // ¸ù¾İ3DÉî¶Èµ÷Õû»æÖÆ²ÎÊı£¬ÔöÇ¿Í¸ÊÓĞ§¹û
+            // æ ¹æ®3Dæ·±åº¦è°ƒæ•´ç»˜åˆ¶å‚æ•°ï¼Œå¢å¼ºé€è§†æ•ˆæœ
             float depthFactor = 1.0f / (1.0f + z * transform3D_.perspective * 2.0f);
-            if (depthFactor < 0.3f) depthFactor = 0.3f; // ÏŞÖÆ×îĞ¡¿É¼û¶È
+            if (depthFactor < 0.3f) depthFactor = 0.3f; // é™åˆ¶æœ€å°å¯è§åº¦
 
-            // Ó¦ÓÃÉî¶È¸ĞÖªµÄ×Ö·û¼ä¾à
+            // åº”ç”¨æ·±åº¦æ„ŸçŸ¥çš„å­—ç¬¦é—´è·
             float charSpacing = textStyle_.charSpacing * depthFactor;
             screenX = static_cast<int>((i - textLen / 2.0f) * (textStyle_.fontSize * 0.8f * charSpacing) + width_ / 2);
 
@@ -768,14 +870,13 @@ private:
         }
 
         SelectObject(hdc, oldFont);
-        DeleteObject(hFont);
     }
 
-    // === ¸ßĞÔÄÜÂË¾µĞ§¹ûÏµÍ³ ===
+    // === é«˜æ€§èƒ½æ»¤é•œæ•ˆæœç³»ç»Ÿ ===
     void ApplyHighPerformanceEffects() {
         if (!AnyFilterEnabled()) return;
 
-        // Ê¹ÓÃPlgBltÊµÏÖ¸ßĞÔÄÜ±ä»»
+        // ä½¿ç”¨PlgBltå®ç°é«˜æ€§èƒ½å˜æ¢
         if (filterEffects_.fishEyeProgress > 0.01f) {
             ApplyFishEyeEffect();
         }
@@ -801,144 +902,168 @@ private:
             filterEffects_.contrast != 1.0f || filterEffects_.brightness != 0.0f;
     }
 
-    // ÓãÑÛĞ§¹û - Ê¹ÓÃPlgBlt
+    // é±¼çœ¼æ•ˆæœ - ä½¿ç”¨PlgBlt
     void ApplyFishEyeEffect() {
+        auto ToLongRound = [](float v) -> LONG {
+            return static_cast<LONG>(std::lround(v));
+        };
+
         float progress = filterEffects_.fishEyeProgress;
         float strength = filterEffects_.fishEyeStrength * progress;
 
         POINT center = { width_ / 2, height_ / 2 };
         POINT ppt[3];
 
-        // ´´½¨ÓãÑÛ±äĞÎ
+        // åˆ›å»ºé±¼çœ¼å˜å½¢
         float distortion = 1.0f - strength * 0.3f;
-        ppt[0].x = center.x - center.x * distortion;
-        ppt[0].y = center.y - center.y * distortion;
-        ppt[1].x = center.x + (width_ - center.x) * distortion;
-        ppt[1].y = center.y - center.y * distortion;
-        ppt[2].x = center.x - center.x * distortion;
-        ppt[2].y = center.y + (height_ - center.y) * distortion;
+        ppt[0].x = ToLongRound(static_cast<float>(center.x) - static_cast<float>(center.x) * distortion);
+        ppt[0].y = ToLongRound(static_cast<float>(center.y) - static_cast<float>(center.y) * distortion);
+        ppt[1].x = ToLongRound(static_cast<float>(center.x) + static_cast<float>(width_ - center.x) * distortion);
+        ppt[1].y = ToLongRound(static_cast<float>(center.y) - static_cast<float>(center.y) * distortion);
+        ppt[2].x = ToLongRound(static_cast<float>(center.x) - static_cast<float>(center.x) * distortion);
+        ppt[2].y = ToLongRound(static_cast<float>(center.y) + static_cast<float>(height_ - center.y) * distortion);
 
         ApplyPlgBltTransform(ppt);
     }
 
-    // äöÎĞĞ§¹û - Ê¹ÓÃPlgBlt
+    // æ¼©æ¶¡æ•ˆæœ - ä½¿ç”¨PlgBlt
     void ApplyTwirlEffect() {
+        auto ToLongRound = [](float v) -> LONG {
+            return static_cast<LONG>(std::lround(v));
+        };
+
         float progress = filterEffects_.twirlProgress;
         float strength = filterEffects_.twirlStrength * progress * 0.5f;
 
         POINT center = { width_ / 2, height_ / 2 };
         POINT ppt[3];
 
-        // ´´½¨äöÎĞ±äĞÎ
+        // åˆ›å»ºæ¼©æ¶¡å˜å½¢
         float angle = strength;
         float cosa = cos(angle);
         float sina = sin(angle);
 
-        ppt[0].x = center.x - center.x * cosa + center.y * sina;
-        ppt[0].y = center.y - center.x * sina - center.y * cosa;
-        ppt[1].x = center.x + (width_ - center.x) * cosa + center.y * sina;
-        ppt[1].y = center.y + (width_ - center.x) * sina - center.y * cosa;
-        ppt[2].x = center.x - center.x * cosa + (height_ - center.y) * sina;
-        ppt[2].y = center.y - center.x * sina + (height_ - center.y) * cosa;
+        ppt[0].x = ToLongRound(static_cast<float>(center.x) - static_cast<float>(center.x) * cosa + static_cast<float>(center.y) * sina);
+        ppt[0].y = ToLongRound(static_cast<float>(center.y) - static_cast<float>(center.x) * sina - static_cast<float>(center.y) * cosa);
+        ppt[1].x = ToLongRound(static_cast<float>(center.x) + static_cast<float>(width_ - center.x) * cosa + static_cast<float>(center.y) * sina);
+        ppt[1].y = ToLongRound(static_cast<float>(center.y) + static_cast<float>(width_ - center.x) * sina - static_cast<float>(center.y) * cosa);
+        ppt[2].x = ToLongRound(static_cast<float>(center.x) - static_cast<float>(center.x) * cosa + static_cast<float>(height_ - center.y) * sina);
+        ppt[2].y = ToLongRound(static_cast<float>(center.y) - static_cast<float>(center.x) * sina + static_cast<float>(height_ - center.y) * cosa);
 
         ApplyPlgBltTransform(ppt);
     }
 
-    // ²¨ÀËĞ§¹û - Ê¹ÓÃPlgBlt
+    // æ³¢æµªæ•ˆæœ - ä½¿ç”¨PlgBlt
     void ApplyWaveEffect() {
+        auto ToLongRound = [](float v) -> LONG {
+            return static_cast<LONG>(std::lround(v));
+        };
+
         float time = animationClock_.waveTime;
         float waveX = sin(time) * filterEffects_.waveAmplitudeX;
         float waveY = cos(time * 0.7f) * filterEffects_.waveAmplitudeY;
 
         POINT ppt[3];
-        ppt[0].x = waveX;
-        ppt[0].y = waveY;
-        ppt[1].x = width_ + waveX;
-        ppt[1].y = waveY;
-        ppt[2].x = waveX;
-        ppt[2].y = height_ + waveY;
+        ppt[0].x = ToLongRound(waveX);
+        ppt[0].y = ToLongRound(waveY);
+        ppt[1].x = ToLongRound(static_cast<float>(width_) + waveX);
+        ppt[1].y = ToLongRound(waveY);
+        ppt[2].x = ToLongRound(waveX);
+        ppt[2].y = ToLongRound(static_cast<float>(height_) + waveY);
 
         ApplyPlgBltTransform(ppt);
     }
 
-    // Ó¦ÓÃPlgBlt±ä»»
+    // åº”ç”¨PlgBltå˜æ¢
     void ApplyPlgBltTransform(POINT ppt[3]) {
-        HDC screenDC = GetDC(NULL);
-        HDC tempDC = CreateCompatibleDC(screenDC);
-        HBITMAP tempBmp = CreateCompatibleBitmap(screenDC, width_, height_);
-        HBITMAP oldTempBmp = (HBITMAP)SelectObject(tempDC, tempBmp);
+        if (!memDC_ || !tempDC_ || !tempBmp_) return;
 
-        // ¸´ÖÆÄÚÈİµ½ÁÙÊ±DC
-        BitBlt(tempDC, 0, 0, width_, height_, memDC_, 0, 0, SRCCOPY);
+        // å¤åˆ¶å†…å®¹åˆ°ä¸´æ—¶DC
+        BitBlt(tempDC_, 0, 0, width_, height_, memDC_, 0, 0, SRCCOPY);
 
-        // Çå³ıÔ­Ê¼ÄÚÈİ
+        // æ¸…é™¤åŸå§‹å†…å®¹
         RECT rect = { 0, 0, width_, height_ };
-        HBRUSH bgBrush = CreateSolidBrush(bgColor_);
-        FillRect(memDC_, &rect, bgBrush);
+        if (!bgBrush_) {
+            bgBrushOwner_.reset(CreateSolidBrush(bgColor_));
+            bgBrush_ = bgBrushOwner_.get();
+        }
+        FillRect(memDC_, &rect, bgBrush_);
 
-        // Ó¦ÓÃPlgBlt±ä»»
-        PlgBlt(memDC_, ppt, tempDC, 0, 0, width_, height_, 0, 0, 0);
-
-        // ÇåÀíÁÙÊ±×ÊÔ´
-        SelectObject(tempDC, oldTempBmp);
-        DeleteObject(tempBmp);
-        DeleteDC(tempDC);
-        DeleteObject(bgBrush);
-        ReleaseDC(NULL, screenDC);
+        // åº”ç”¨PlgBltå˜æ¢
+        PlgBlt(memDC_, ppt, tempDC_, 0, 0, width_, height_, 0, 0, 0);
     }
 
-    // ÏñËØ»¯Ğ§¹û
+    // åƒç´ åŒ–æ•ˆæœ
     void ApplyPixelateEffect() {
         int size = filterEffects_.pixelSize;
         if (size <= 1) return;
+        if (!dibBits_) return;
 
-        for (int y = 0; y < height_; y += size) {
-            for (int x = 0; x < width_; x += size) {
-                COLORREF color = GetPixel(memDC_, x + size / 2, y + size / 2);
+        auto* pixels = static_cast<std::uint32_t*>(dibBits_);
+        const int w = width_;
+        const int h = height_;
 
-                for (int py = 0; py < size && y + py < height_; py++) {
-                    for (int px = 0; px < size && x + px < width_; px++) {
-                        SetPixel(memDC_, x + px, y + py, color);
+        for (int y = 0; y < h; y += size) {
+            const int sampleY = (y + size / 2 < h) ? (y + size / 2) : (h - 1);
+            const int yMax = (y + size < h) ? (y + size) : h;
+
+            for (int x = 0; x < w; x += size) {
+                const int sampleX = (x + size / 2 < w) ? (x + size / 2) : (w - 1);
+                const std::uint32_t sample = pixels[sampleY * w + sampleX];
+                const int xMax = (x + size < w) ? (x + size) : w;
+
+                for (int yy = y; yy < yMax; ++yy) {
+                    std::uint32_t* row = pixels + yy * w;
+                    for (int xx = x; xx < xMax; ++xx) {
+                        row[xx] = sample;
                     }
                 }
             }
         }
     }
 
-    // ÑÕÉ«Ğ§¹û
+    // é¢œè‰²æ•ˆæœ
     void ApplyColorEffects() {
-        for (int y = 0; y < height_; y++) {
-            for (int x = 0; x < width_; x++) {
-                COLORREF color = GetPixel(memDC_, x, y);
-                int r = GetRValue(color);
-                int g = GetGValue(color);
-                int b = GetBValue(color);
+        if (!dibBits_) return;
 
-                // ÑÕÉ«·´×ª
+        auto* pixels = static_cast<std::uint32_t*>(dibBits_);
+        const std::size_t count =
+            static_cast<std::size_t>(width_) * static_cast<std::size_t>(height_);
+
+        for (std::size_t i = 0; i < count; ++i) {
+            const std::uint32_t c = pixels[i];
+            int b = static_cast<int>(c & 0xFFu);
+            int g = static_cast<int>((c >> 8) & 0xFFu);
+            int r = static_cast<int>((c >> 16) & 0xFFu);
+            const std::uint32_t a = (c >> 24) & 0xFFu;
+
+                // é¢œè‰²åè½¬
                 if (filterEffects_.enableInvert) {
                     r = 255 - r;
                     g = 255 - g;
                     b = 255 - b;
                 }
 
-                // »Ò¶È»¯
+                // ç°åº¦åŒ–
                 if (filterEffects_.enableGrayscale) {
                     int gray = (r + g + b) / 3;
                     r = g = b = gray;
                 }
 
-                // ¶Ô±È¶È
+                // å¯¹æ¯”åº¦
                 r = static_cast<int>((r - 127) * filterEffects_.contrast + 127 + filterEffects_.brightness);
                 g = static_cast<int>((g - 127) * filterEffects_.contrast + 127 + filterEffects_.brightness);
                 b = static_cast<int>((b - 127) * filterEffects_.contrast + 127 + filterEffects_.brightness);
 
-                // ÏŞÖÆ·¶Î§
+                // é™åˆ¶èŒƒå›´
                 r = (std::max)(0, (std::min)(255, r));
                 g = (std::max)(0, (std::min)(255, g));
                 b = (std::max)(0, (std::min)(255, b));
 
-                SetPixel(memDC_, x, y, RGB(r, g, b));
-            }
+            pixels[i] = (a << 24) |
+                (static_cast<std::uint32_t>(r) << 16) |
+                (static_cast<std::uint32_t>(g) << 8) |
+                (static_cast<std::uint32_t>(b));
         }
     }
 

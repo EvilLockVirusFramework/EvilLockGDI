@@ -1,4 +1,4 @@
-#ifndef MESSAGEBOX_WAVE_HPP
+ï»¿#ifndef MESSAGEBOX_WAVE_HPP
 #define MESSAGEBOX_WAVE_HPP
 
 #include "MessageBoxWindow.hpp"
@@ -9,14 +9,14 @@ private:
 
 
 	/**
-	 * @brief													: ²¨ÀËÁ£×Ó½á¹¹Ìå
-	 * @details													: ´æ´¢µ¥¸ö²¨ÀËÁ£×ÓµÄ×´Ì¬ºÍÎ»ÖÃ
+	 * @brief													: æ³¢æµªç²’å­ç»“æ„ä½“
+	 * @details													: å­˜å‚¨å•ä¸ªæ³¢æµªç²’å­çš„çŠ¶æ€å’Œä½ç½®
 	 */
 	struct WaveParticle {
 		MessageBoxWindow* window;
-		int currentX, currentY;									///< µ±Ç°Î»ÖÃ
+		int currentX, currentY;									///< å½“å‰ä½ç½®
 		bool isAlive;
-		int index;												///< ÔÚ¶ÓÁĞÖĞµÄË÷Òı
+		int index;												///< åœ¨é˜Ÿåˆ—ä¸­çš„ç´¢å¼•
 
 		WaveParticle(MessageBoxWindow* win, int x, int y, int idx)
 			: window(win), currentX(x), currentY(y), isAlive(true), index(idx) {
@@ -25,18 +25,18 @@ private:
 
 
 
-	static std::list<WaveParticle> particles;					///< »î¶¯Á£×ÓÁĞ±í
-	static std::mutex particlesMutex;							///< Á£×ÓÁĞ±í»¥³âËø
-	static std::atomic<bool> isWaveRunning;						///< ²¨ÀËÌØĞ§ÔËĞĞ±êÖ¾
-	static std::thread waveThread;								///< ²¨ÀËÌØĞ§Ïß³Ì
+	static std::list<WaveParticle> particles;					///< æ´»åŠ¨ç²’å­åˆ—è¡¨
+	static std::mutex particlesMutex;							///< ç²’å­åˆ—è¡¨äº’æ–¥é”
+	static std::atomic<bool> isWaveRunning;						///< æ³¢æµªç‰¹æ•ˆè¿è¡Œæ ‡å¿—
+	static std::thread waveThread;								///< æ³¢æµªç‰¹æ•ˆçº¿ç¨‹
 
 
 
-	static std::vector<std::pair<int, int>> trajectoryPoints;	///< ¹ì¼£µã¶ÓÁĞ
-	static int currentTrajectoryIndex;							///< µ±Ç°¹ì¼£¶ÎË÷Òı
-	static float progress;										///< ÔÚµ±Ç°¹ì¼£¶ÎÖĞµÄ½ø¶È (0.0 - 1.0)
-	static int moveStep;										///< ÒÆ¶¯²½³¤
-	static int spacing;											///< ´°¿Ú¼ä¾à
+	static std::vector<std::pair<int, int>> trajectoryPoints;	///< è½¨è¿¹ç‚¹é˜Ÿåˆ—
+	static int currentTrajectoryIndex;							///< å½“å‰è½¨è¿¹æ®µç´¢å¼•
+	static float progress;										///< åœ¨å½“å‰è½¨è¿¹æ®µä¸­çš„è¿›åº¦ (0.0 - 1.0)
+	static int moveStep;										///< ç§»åŠ¨æ­¥é•¿
+	static int spacing;											///< çª—å£é—´è·
 	static int screenWidth, screenHeight;
 
 
@@ -46,18 +46,18 @@ public:
 
 
 	/**
-	 * @brief													: ´´½¨¹ì¼£²¨ÀËÌØĞ§£¨Ö¸¶¨ÆğÊ¼Î»ÖÃ£©
-	 * @details													: ´´½¨Ò»ÏµÁĞÏûÏ¢¿òÑØÔ¤¶¨Òå¹ì¼£ÒÆ¶¯ĞÎ³É²¨ÀËĞ§¹û
+	 * @brief													: åˆ›å»ºè½¨è¿¹æ³¢æµªç‰¹æ•ˆï¼ˆæŒ‡å®šèµ·å§‹ä½ç½®ï¼‰
+	 * @details													: åˆ›å»ºä¸€ç³»åˆ—æ¶ˆæ¯æ¡†æ²¿é¢„å®šä¹‰è½¨è¿¹ç§»åŠ¨å½¢æˆæ³¢æµªæ•ˆæœ
 	 * 
-	 * @param[in]		text									: ÏûÏ¢ÎÄ±¾
-	 * @param[in]		caption									: ±êÌâ
-	 * @param[in]		uType									: ÏûÏ¢¿òÀàĞÍ
-	 * @param[in]		startX									: ÆğÊ¼Î»ÖÃX×ø±ê£¨-1±íÊ¾Í£Ö¹ÌØĞ§£©
-	 * @param[in]		startY									: ÆğÊ¼Î»ÖÃY×ø±ê£¨-1±íÊ¾Í£Ö¹ÌØĞ§£©
-	 * @param[in]		queueLength								: ¶ÓÁĞ³¤¶È
-	 * @param[in]		stepSize								: ÒÆ¶¯²½³¤
-	 * @param[in]		windowSpacing							: ´°¿Ú¼ä¾à
-	 * @param[in]		creationDelay							: ´´½¨ÑÓ³Ù£¨ºÁÃë£©
+	 * @param[in]		text									: æ¶ˆæ¯æ–‡æœ¬
+	 * @param[in]		caption									: æ ‡é¢˜
+	 * @param[in]		uType									: æ¶ˆæ¯æ¡†ç±»å‹
+	 * @param[in]		startX									: èµ·å§‹ä½ç½®Xåæ ‡ï¼ˆ-1è¡¨ç¤ºåœæ­¢ç‰¹æ•ˆï¼‰
+	 * @param[in]		startY									: èµ·å§‹ä½ç½®Yåæ ‡ï¼ˆ-1è¡¨ç¤ºåœæ­¢ç‰¹æ•ˆï¼‰
+	 * @param[in]		queueLength								: é˜Ÿåˆ—é•¿åº¦
+	 * @param[in]		stepSize								: ç§»åŠ¨æ­¥é•¿
+	 * @param[in]		windowSpacing							: çª—å£é—´è·
+	 * @param[in]		creationDelay							: åˆ›å»ºå»¶è¿Ÿï¼ˆæ¯«ç§’ï¼‰
 	 */
 	static void CreateWaveEffectAt(const std::wstring& text, const std::wstring& caption,
 		UINT uType, int startX, int startY, int queueLength = 15, int stepSize = 4,
@@ -66,7 +66,7 @@ public:
 		if (startX == -1 && startY == -1) {
 			StopWaveEffect();
 			return;
-		}														///< Èç¹û´«Èë(-1, -1),ÔòÍ£Ö¹ÌØĞ§
+		}														///< å¦‚æœä¼ å…¥(-1, -1),åˆ™åœæ­¢ç‰¹æ•ˆ
 
 		if (isWaveRunning) {
 			StopWaveEffect();
@@ -76,10 +76,10 @@ public:
 
 		
 		screenWidth = GetSystemMetrics(SM_CXSCREEN);
-		screenHeight = GetSystemMetrics(SM_CYSCREEN);			///< »ñÈ¡ÆÁÄ»³ß´ç
+		screenHeight = GetSystemMetrics(SM_CYSCREEN);			///< è·å–å±å¹•å°ºå¯¸
 
 		
-		DefineTrajectory(startX, startY);						///< ¶¨ÒåÔË¶¯¹ì¼£µã,Ê¹ÓÃÖ¸¶¨µÄÆğÊ¼Î»ÖÃ
+		DefineTrajectory(startX, startY);						///< å®šä¹‰è¿åŠ¨è½¨è¿¹ç‚¹,ä½¿ç”¨æŒ‡å®šçš„èµ·å§‹ä½ç½®
 
 		currentTrajectoryIndex = 0;
 		progress = 0.0f;
@@ -94,16 +94,16 @@ public:
 
 
 	/**
-	 * @brief													: ´´½¨¹ì¼£²¨ÀËÌØĞ§£¨Ê¹ÓÃÄ¬ÈÏÆğÊ¼Î»ÖÃ£©
-	 * @details													: ´´½¨Ò»ÏµÁĞÏûÏ¢¿òÑØÔ¤¶¨Òå¹ì¼£ÒÆ¶¯ĞÎ³É²¨ÀËĞ§¹û
+	 * @brief													: åˆ›å»ºè½¨è¿¹æ³¢æµªç‰¹æ•ˆï¼ˆä½¿ç”¨é»˜è®¤èµ·å§‹ä½ç½®ï¼‰
+	 * @details													: åˆ›å»ºä¸€ç³»åˆ—æ¶ˆæ¯æ¡†æ²¿é¢„å®šä¹‰è½¨è¿¹ç§»åŠ¨å½¢æˆæ³¢æµªæ•ˆæœ
 	 * 
-	 * @param[in]		text									: ÏûÏ¢ÎÄ±¾
-	 * @param[in]		caption									: ±êÌâ
-	 * @param[in]		uType									: ÏûÏ¢¿òÀàĞÍ
-	 * @param[in]		queueLength								: ¶ÓÁĞ³¤¶È,Ä¬ÈÏ15
-	 * @param[in]		stepSize								: ÒÆ¶¯²½³¤,µ¥Î»ÏñËØ,Ä¬ÈÏ4ÏñËØ
-	 * @param[in]		windowSpacing							: ´°¿Ú¼ä¾à,µ¥Î»ÏñËØ,Ä¬ÈÏ25ÏñËØ
-	 * @param[in]		creationDelay							: ´´½¨ÑÓ³Ù,µ¥Î»ºÁÃë,Ä¬ÈÏ150ºÁÃë
+	 * @param[in]		text									: æ¶ˆæ¯æ–‡æœ¬
+	 * @param[in]		caption									: æ ‡é¢˜
+	 * @param[in]		uType									: æ¶ˆæ¯æ¡†ç±»å‹
+	 * @param[in]		queueLength								: é˜Ÿåˆ—é•¿åº¦,é»˜è®¤15
+	 * @param[in]		stepSize								: ç§»åŠ¨æ­¥é•¿,å•ä½åƒç´ ,é»˜è®¤4åƒç´ 
+	 * @param[in]		windowSpacing							: çª—å£é—´è·,å•ä½åƒç´ ,é»˜è®¤25åƒç´ 
+	 * @param[in]		creationDelay							: åˆ›å»ºå»¶è¿Ÿ,å•ä½æ¯«ç§’,é»˜è®¤150æ¯«ç§’
 	 */
 	static void CreateWaveEffect(const std::wstring& text, const std::wstring& caption,
 		UINT uType, int queueLength = 15, int stepSize = 4, int windowSpacing = 25,
@@ -111,7 +111,7 @@ public:
 
 		
 		int startX = 0;
-		int startY = GetSystemMetrics(SM_CYSCREEN) / 2;			///< Ê¹ÓÃÄ¬ÈÏÆğÊ¼Î»ÖÃ£¨ÆÁÄ»×ó²àÖĞ¼ä£©
+		int startY = GetSystemMetrics(SM_CYSCREEN) / 2;			///< ä½¿ç”¨é»˜è®¤èµ·å§‹ä½ç½®ï¼ˆå±å¹•å·¦ä¾§ä¸­é—´ï¼‰
 
 		CreateWaveEffectAt(text, caption, uType, startX, startY, queueLength, stepSize,
 			windowSpacing, creationDelay);
@@ -120,17 +120,17 @@ public:
 
 
 	/**
-	 * @brief													: ´´½¨×Ô¶¨Òå¹ì¼£µÄ²¨ÀËÌØĞ§
-	 * @details													: ´´½¨Ò»ÏµÁĞÏûÏ¢¿òÑØÖ¸¶¨¹ì¼£µãÒÆ¶¯ĞÎ³É²¨ÀËĞ§¹û
+	 * @brief													: åˆ›å»ºè‡ªå®šä¹‰è½¨è¿¹çš„æ³¢æµªç‰¹æ•ˆ
+	 * @details													: åˆ›å»ºä¸€ç³»åˆ—æ¶ˆæ¯æ¡†æ²¿æŒ‡å®šè½¨è¿¹ç‚¹ç§»åŠ¨å½¢æˆæ³¢æµªæ•ˆæœ
 	 * 
-	 * @param[in]		text									: ÏûÏ¢ÎÄ±¾
-	 * @param[in]		caption									: ±êÌâ
-	 * @param[in]		uType									: ÏûÏ¢¿òÀàĞÍ
-	 * @param[in]		customTrajectory						: ×Ô¶¨Òå¹ì¼£µãÁĞ±í
-	 * @param[in]		queueLength								: ¶ÓÁĞ³¤¶È,Ä¬ÈÏ15
-	 * @param[in]		stepSize								: ÒÆ¶¯²½³¤,µ¥Î»ÏñËØ,Ä¬ÈÏ4ÏñËØ
-	 * @param[in]		windowSpacing							: ´°¿Ú¼ä¾à,µ¥Î»ÏñËØ,Ä¬ÈÏ25ÏñËØ
-	 * @param[in]		creationDelay							: ´´½¨ÑÓ³Ù,µ¥Î»ºÁÃë,Ä¬ÈÏ150ºÁÃë
+	 * @param[in]		text									: æ¶ˆæ¯æ–‡æœ¬
+	 * @param[in]		caption									: æ ‡é¢˜
+	 * @param[in]		uType									: æ¶ˆæ¯æ¡†ç±»å‹
+	 * @param[in]		customTrajectory						: è‡ªå®šä¹‰è½¨è¿¹ç‚¹åˆ—è¡¨
+	 * @param[in]		queueLength								: é˜Ÿåˆ—é•¿åº¦,é»˜è®¤15
+	 * @param[in]		stepSize								: ç§»åŠ¨æ­¥é•¿,å•ä½åƒç´ ,é»˜è®¤4åƒç´ 
+	 * @param[in]		windowSpacing							: çª—å£é—´è·,å•ä½åƒç´ ,é»˜è®¤25åƒç´ 
+	 * @param[in]		creationDelay							: åˆ›å»ºå»¶è¿Ÿ,å•ä½æ¯«ç§’,é»˜è®¤150æ¯«ç§’
 	 */
 	static void CreateCustomWaveEffect(const std::wstring& text, const std::wstring& caption,
 		UINT uType, const std::vector<std::pair<int, int>>& customTrajectory,
@@ -143,16 +143,16 @@ public:
 		isWaveRunning = true;
 
 		screenWidth = GetSystemMetrics(SM_CXSCREEN);
-		screenHeight = GetSystemMetrics(SM_CYSCREEN);			///< »ñÈ¡ÆÁÄ»³ß´ç
+		screenHeight = GetSystemMetrics(SM_CYSCREEN);			///< è·å–å±å¹•å°ºå¯¸
 
-		trajectoryPoints = customTrajectory;					///< Ê¹ÓÃ×Ô¶¨Òå¹ì¼£
+		trajectoryPoints = customTrajectory;					///< ä½¿ç”¨è‡ªå®šä¹‰è½¨è¿¹
 
 		
 		if (trajectoryPoints.size() >= 2 &&
 			(trajectoryPoints.front().first != trajectoryPoints.back().first ||
 				trajectoryPoints.front().second != trajectoryPoints.back().second)) {
 			trajectoryPoints.push_back(trajectoryPoints.front());
-		}														///< È·±£¹ì¼£ÊÇ±ÕºÏµÄ£¨×îºóÒ»¸öµã»Øµ½µÚÒ»¸öµã£©
+		}														///< ç¡®ä¿è½¨è¿¹æ˜¯é—­åˆçš„ï¼ˆæœ€åä¸€ä¸ªç‚¹å›åˆ°ç¬¬ä¸€ä¸ªç‚¹ï¼‰
 
 		currentTrajectoryIndex = 0;
 		progress = 0.0f;
@@ -167,8 +167,8 @@ public:
 
 
 	/**
-	 * @brief													: Í£Ö¹²¨ÀËÌØĞ§
-	 * @details													: Í£Ö¹ËùÓĞÏûÏ¢¿òµÄ´´½¨ºÍÒÆ¶¯,²¢¹Ø±ÕÏÖÓĞµÄÏûÏ¢¿ò
+	 * @brief													: åœæ­¢æ³¢æµªç‰¹æ•ˆ
+	 * @details													: åœæ­¢æ‰€æœ‰æ¶ˆæ¯æ¡†çš„åˆ›å»ºå’Œç§»åŠ¨,å¹¶å…³é—­ç°æœ‰çš„æ¶ˆæ¯æ¡†
 	 */
 	static void StopWaveEffect() {
 		isWaveRunning = false;
@@ -189,8 +189,8 @@ public:
 
 
 	/**
-	 * @brief													: ¼ì²é²¨ÀËÌØĞ§ÊÇ·ñÔÚÔËĞĞ
-	 * details													: ·µ»Øµ±Ç°²¨ÀËÌØĞ§µÄÔËĞĞ×´Ì¬
+	 * @brief													: æ£€æŸ¥æ³¢æµªç‰¹æ•ˆæ˜¯å¦åœ¨è¿è¡Œ
+	 * details													: è¿”å›å½“å‰æ³¢æµªç‰¹æ•ˆçš„è¿è¡ŒçŠ¶æ€
 	 */
 	static bool IsWaveRunning() {
 		return isWaveRunning;
@@ -198,8 +198,8 @@ public:
 
 
 	/**
-	 * @brief													: »ñÈ¡µ±Ç°¶ÓÁĞ³¤¶È
-	 * @details													: ·µ»Øµ±Ç°»îÔ¾µÄÏûÏ¢¿òÊıÁ¿
+	 * @brief													: è·å–å½“å‰é˜Ÿåˆ—é•¿åº¦
+	 * @details													: è¿”å›å½“å‰æ´»è·ƒçš„æ¶ˆæ¯æ¡†æ•°é‡
 	 */
 	static int GetQueueLength() {
 		std::lock_guard<std::mutex> lock(particlesMutex);
@@ -209,7 +209,7 @@ public:
 
 
 	/**
-	 * @brief 													: »ñÈ¡µ±Ç°¹ì¼£µã
+	 * @brief 													: è·å–å½“å‰è½¨è¿¹ç‚¹
 	 */
 	static std::vector<std::pair<int, int>> GetTrajectoryPoints() {
 		return trajectoryPoints;
@@ -222,17 +222,17 @@ private:
 
 
 	/**
-	 * @brief													: ¶¨Òå¹ì¼£µã
-	 * @details													: »ùÓÚÖ¸¶¨µÄÆğÊ¼Î»ÖÃ¶¨ÒåÒ»ÌõÔ¤Éè¹ì¼£
+	 * @brief													: å®šä¹‰è½¨è¿¹ç‚¹
+	 * @details													: åŸºäºæŒ‡å®šçš„èµ·å§‹ä½ç½®å®šä¹‰ä¸€æ¡é¢„è®¾è½¨è¿¹
 	 * 
-	 * @param[in]		startX									: ÆğÊ¼Î»ÖÃX×ø±ê
-	 * @param[in]		startY									: ÆğÊ¼Î»ÖÃY×ø±ê
+	 * @param[in]		startX									: èµ·å§‹ä½ç½®Xåæ ‡
+	 * @param[in]		startY									: èµ·å§‹ä½ç½®Yåæ ‡
 	 */
 	static void DefineTrajectory(int startX, int startY) {
 		trajectoryPoints.clear();
 
-		///< »ùÓÚÖ¸¶¨µÄÆğÊ¼Î»ÖÃ¶¨Òå¹ì¼£
-		///< ¹ì¼££ºÆğÊ¼µã -> ÖĞ¼äµ×²¿ -> ÓÒÉÏ½Ç -> »Øµ½ÆğÊ¼µã
+		///< åŸºäºæŒ‡å®šçš„èµ·å§‹ä½ç½®å®šä¹‰è½¨è¿¹
+		///< è½¨è¿¹ï¼šèµ·å§‹ç‚¹ -> ä¸­é—´åº•éƒ¨ -> å³ä¸Šè§’ -> å›åˆ°èµ·å§‹ç‚¹
 		trajectoryPoints.push_back({ startX, startY });
 		trajectoryPoints.push_back({ screenWidth / 2, screenHeight - 100 });
 		trajectoryPoints.push_back({ screenWidth - 100, 100 });
@@ -242,43 +242,43 @@ private:
 
 
 	/**
-	 * @brief													: ²¨ÀËÌØĞ§Ïß³Ìº¯Êı
-	 * @details													: ³ÖĞø´´½¨ºÍ¸üĞÂÏûÏ¢¿òÎ»ÖÃ,ĞÎ³É²¨ÀËĞ§¹û
+	 * @brief													: æ³¢æµªç‰¹æ•ˆçº¿ç¨‹å‡½æ•°
+	 * @details													: æŒç»­åˆ›å»ºå’Œæ›´æ–°æ¶ˆæ¯æ¡†ä½ç½®,å½¢æˆæ³¢æµªæ•ˆæœ
 	 * 
-	 * @param[in]		text									: ÏûÏ¢ÎÄ±¾
-	 * @param[in]		caption									: ÏûÏ¢±êÌâ
-	 * @param[in]		uType									: ÏûÏ¢¿òÀàĞÍ
-	 * @param[in]		queueLength								: ¶ÓÁĞ³¤¶È
-	 * @param[in]		creationDelay							: ´´½¨ÑÓ³Ù,µ¥Î»ºÁÃë
+	 * @param[in]		text									: æ¶ˆæ¯æ–‡æœ¬
+	 * @param[in]		caption									: æ¶ˆæ¯æ ‡é¢˜
+	 * @param[in]		uType									: æ¶ˆæ¯æ¡†ç±»å‹
+	 * @param[in]		queueLength								: é˜Ÿåˆ—é•¿åº¦
+	 * @param[in]		creationDelay							: åˆ›å»ºå»¶è¿Ÿ,å•ä½æ¯«ç§’
 	 */
 	static void WaveEffectThread(const std::wstring& text, const std::wstring& caption,
 		UINT uType, int queueLength, int creationDelay) {
 
 		int creationCounter = 0;
-		std::vector<std::pair<int, int>> particleTrail;			///< ¼ÇÂ¼Í·²¿ÀúÊ·Î»ÖÃ
+		std::vector<std::pair<int, int>> particleTrail;			///< è®°å½•å¤´éƒ¨å†å²ä½ç½®
 
 		while (isWaveRunning) {
-			UpdateHeadPosition();								///< ¸üĞÂÍ·²¿Î»ÖÃ£¨ÑØ×Å¹ì¼£ÒÆ¶¯£©
+			UpdateHeadPosition();								///< æ›´æ–°å¤´éƒ¨ä½ç½®ï¼ˆæ²¿ç€è½¨è¿¹ç§»åŠ¨ï¼‰
 
-			particleTrail.push_back({GetCurrentHeadPosition()});///< ¼ÇÂ¼Í·²¿Î»ÖÃµ½¹ì¼£ÀúÊ·
+			particleTrail.push_back({GetCurrentHeadPosition()});///< è®°å½•å¤´éƒ¨ä½ç½®åˆ°è½¨è¿¹å†å²
 
 			
 			if (particleTrail.size() > static_cast<size_t>(queueLength)) {
 				particleTrail.erase(particleTrail.begin());
-			}													///< ±£³Ö¹ì¼£ÀúÊ·³¤¶ÈÓë¶ÓÁĞ³¤¶ÈÒ»ÖÂ
+			}													///< ä¿æŒè½¨è¿¹å†å²é•¿åº¦ä¸é˜Ÿåˆ—é•¿åº¦ä¸€è‡´
 
 			if (particles.size() < static_cast<size_t>(queueLength) && creationCounter <= 0) {
 				CreateNewParticle(text, caption, uType);
 				creationCounter = creationDelay / 16;
-			}													///< ´´½¨ĞÂÁ£×Ó(Èç¹û¶ÓÁĞ²»¹»³¤)
+			}													///< åˆ›å»ºæ–°ç²’å­(å¦‚æœé˜Ÿåˆ—ä¸å¤Ÿé•¿)
 
 			if (creationCounter > 0) {
 				creationCounter--;
 			}
 
-			UpdateParticlePositions(particleTrail);				///< ¸üĞÂËùÓĞÁ£×ÓµÄÎ»ÖÃ£¨ÑØ×ÅÏàÍ¬µÄ¹ì¼££©
+			UpdateParticlePositions(particleTrail);				///< æ›´æ–°æ‰€æœ‰ç²’å­çš„ä½ç½®ï¼ˆæ²¿ç€ç›¸åŒçš„è½¨è¿¹ï¼‰
 
-			CleanupDeadParticles();								///< ÇåÀíËÀÍöÁ£×Ó
+			CleanupDeadParticles();								///< æ¸…ç†æ­»äº¡ç²’å­
 
 			std::this_thread::sleep_for(
 				std::chrono::milliseconds(16));					///< ~60fps
@@ -288,8 +288,8 @@ private:
 
 
 	/**
-	 * @brief													: ¸üĞÂÍ·²¿Î»ÖÃ
-	 * @details													: ¼ÆËãÍ·²¿ÑØ¹ì¼£ÒÆ¶¯µÄĞÂÎ»ÖÃ
+	 * @brief													: æ›´æ–°å¤´éƒ¨ä½ç½®
+	 * @details													: è®¡ç®—å¤´éƒ¨æ²¿è½¨è¿¹ç§»åŠ¨çš„æ–°ä½ç½®
 	 */
 	static void UpdateHeadPosition() {
 		if (trajectoryPoints.size() < 2) return;
@@ -302,25 +302,25 @@ private:
 
 		float dx = static_cast<float>(endPoint.first - startPoint.first);
 		float dy = static_cast<float>(endPoint.second - startPoint.second);
-		float distance = std::sqrt(dx * dx + dy * dy);			///< ¼ÆËãÁ½µãÖ®¼äµÄ¾àÀë
+		float distance = std::sqrt(dx * dx + dy * dy);			///< è®¡ç®—ä¸¤ç‚¹ä¹‹é—´çš„è·ç¦»
 
-		if (distance == 0) return;								///< ±ÜÃâ³ıÁã
+		if (distance == 0) return;								///< é¿å…é™¤é›¶
 
 		float progressIncrement = moveStep / distance;
-		progress += progressIncrement;							///< ¼ÆËãÃ¿Ò»²½µÄ½ø¶ÈÔöÁ¿
+		progress += progressIncrement;							///< è®¡ç®—æ¯ä¸€æ­¥çš„è¿›åº¦å¢é‡
 
 		if (progress >= 1.0f) {
 			progress = 0.0f;
 			currentTrajectoryIndex = nextIdx;
-		}														///< Èç¹ûÍê³Éµ±Ç°¶Î,ÒÆ¶¯µ½ÏÂÒ»¶Î
+		}														///< å¦‚æœå®Œæˆå½“å‰æ®µ,ç§»åŠ¨åˆ°ä¸‹ä¸€æ®µ
 	}
 
 
 
 	/**
-	 * @brief													: »ñÈ¡µ±Ç°Í·²¿Î»ÖÃ
-	 * @details													: ¼ÆËãÍ·²¿ÔÚµ±Ç°¹ì¼£¶ÎÖĞµÄ²åÖµÎ»ÖÃ
-	 * @return													: µ±Ç°Í·²¿Î»ÖÃµÄ×ø±ê¶Ô (x, y)
+	 * @brief													: è·å–å½“å‰å¤´éƒ¨ä½ç½®
+	 * @details													: è®¡ç®—å¤´éƒ¨åœ¨å½“å‰è½¨è¿¹æ®µä¸­çš„æ’å€¼ä½ç½®
+	 * @return													: å½“å‰å¤´éƒ¨ä½ç½®çš„åæ ‡å¯¹ (x, y)
 	 */
 	static std::pair<int, int> GetCurrentHeadPosition() {
 		if (trajectoryPoints.size() < 2) return { 0, 0 };
@@ -331,7 +331,7 @@ private:
 		const auto& startPoint = trajectoryPoints[currentIdx];
 		const auto& endPoint = trajectoryPoints[nextIdx];
 
-		///< ÏßĞÔ²åÖµ¼ÆËãµ±Ç°Î»ÖÃ
+		///< çº¿æ€§æ’å€¼è®¡ç®—å½“å‰ä½ç½®
 		float x = startPoint.first + (endPoint.first - startPoint.first) * progress;
 		float y = startPoint.second + (endPoint.second - startPoint.second) * progress;
 
@@ -341,12 +341,12 @@ private:
 
 
 	/**
-	 * @brief													: ´´½¨ĞÂÁ£×Ó
-	 * @details													: ÔÚµ±Ç°Í·²¿Î»ÖÃ´´½¨Ò»¸öĞÂµÄÏûÏ¢¿òÁ£×Ó
+	 * @brief													: åˆ›å»ºæ–°ç²’å­
+	 * @details													: åœ¨å½“å‰å¤´éƒ¨ä½ç½®åˆ›å»ºä¸€ä¸ªæ–°çš„æ¶ˆæ¯æ¡†ç²’å­
 	 * 
-	 * @param[in]		text									: ÏûÏ¢ÎÄ±¾
-	 * @param[in]		caption									: ÏûÏ¢±êÌâ
-	 * @param[in]		uType									: ÏûÏ¢¿òÀàĞÍ
+	 * @param[in]		text									: æ¶ˆæ¯æ–‡æœ¬
+	 * @param[in]		caption									: æ¶ˆæ¯æ ‡é¢˜
+	 * @param[in]		uType									: æ¶ˆæ¯æ¡†ç±»å‹
 	 */
 	static void CreateNewParticle(const std::wstring& text, const std::wstring& caption, UINT uType) {
 		auto headPos = GetCurrentHeadPosition();
@@ -364,20 +364,20 @@ private:
 
 
 	/**
-	 * @brief													: ¸üĞÂËùÓĞÁ£×ÓÎ»ÖÃ
-	 * @details													: ¸ù¾İ¹ì¼£ÀúÊ·¸üĞÂÃ¿¸öÁ£×ÓµÄÎ»ÖÃ
+	 * @brief													: æ›´æ–°æ‰€æœ‰ç²’å­ä½ç½®
+	 * @details													: æ ¹æ®è½¨è¿¹å†å²æ›´æ–°æ¯ä¸ªç²’å­çš„ä½ç½®
 	 * 
-	 * @param[in]		trail									: Í·²¿Î»ÖÃµÄÀúÊ·¹ì¼£
+	 * @param[in]		trail									: å¤´éƒ¨ä½ç½®çš„å†å²è½¨è¿¹
 	 */
 	static void UpdateParticlePositions(const std::vector<std::pair<int, int>>& trail) {
 		std::lock_guard<std::mutex> lock(particlesMutex);
 
 		if (particles.empty() || trail.empty()) return;
 
-		///< Ã¿¸öÁ£×Ó¶ÔÓ¦¹ì¼£ÀúÊ·ÖĞµÄÒ»¸öÎ»ÖÃ
+		///< æ¯ä¸ªç²’å­å¯¹åº”è½¨è¿¹å†å²ä¸­çš„ä¸€ä¸ªä½ç½®
 		auto particleIt = particles.begin();
 
-		///< ´Ó¹ì¼£ÀúÊ·µÄÎ²²¿¿ªÊ¼·ÖÅä£¨×îĞÂµÄÎ»ÖÃ¸øµÚÒ»¸öÁ£×Ó£©
+		///< ä»è½¨è¿¹å†å²çš„å°¾éƒ¨å¼€å§‹åˆ†é…ï¼ˆæœ€æ–°çš„ä½ç½®ç»™ç¬¬ä¸€ä¸ªç²’å­ï¼‰
 		int trailIndex = static_cast<int>(trail.size()) - 1;
 
 		for (; particleIt != particles.end() && trailIndex >= 0; ++particleIt, --trailIndex) {
@@ -387,7 +387,7 @@ private:
 				particleIt->currentX = targetPos.first;
 				particleIt->currentY = targetPos.second;
 
-				///< ÒÆ¶¯´°¿Úµ½ĞÂÎ»ÖÃ
+				///< ç§»åŠ¨çª—å£åˆ°æ–°ä½ç½®
 				if (particleIt->window && particleIt->window->IsAlive()) {
 					SetWindowPos(particleIt->window->GetHandle(), nullptr,
 						particleIt->currentX, particleIt->currentY, 0, 0,
@@ -400,8 +400,8 @@ private:
 
 
 	/**
-	 * @brief													: ÇåÀíËÀÍöÁ£×Ó
-	 * @details													: ÒÆ³ı²»ÔÙ´æ»îµÄÁ£×Ó²¢¹Ø±ÕÆä´°¿Ú
+	 * @brief													: æ¸…ç†æ­»äº¡ç²’å­
+	 * @details													: ç§»é™¤ä¸å†å­˜æ´»çš„ç²’å­å¹¶å…³é—­å…¶çª—å£
 	 */
 	static void CleanupDeadParticles() {
 		std::lock_guard<std::mutex> lock(particlesMutex);
@@ -423,25 +423,37 @@ private:
 		int index = 0;
 		for (auto& particle : particles) {
 			particle.index = index++;
-		}														///< ÖØĞÂË÷Òı
+		}														///< é‡æ–°ç´¢å¼•
 	}
 };
 
 
 
-std::list<WaveEffect::WaveParticle> WaveEffect::particles;
-std::mutex WaveEffect::particlesMutex;
-std::atomic<bool> WaveEffect::isWaveRunning(false);
-std::thread WaveEffect::waveThread;
+// è¯´æ˜ï¼šè¿™äº›é™æ€æˆå‘˜å¦‚æœåœ¨å¤´æ–‡ä»¶é‡Œâ€œç›´æ¥å®šä¹‰â€ï¼Œä¸€æ—¦è¢«å¤šä¸ª .cpp åŒ…å«å°±ä¼šå‡ºç°é‡å¤é“¾æ¥é”™è¯¯ï¼ˆODR è¿è§„ï¼‰ã€‚
+// C++17 èµ·æ”¯æŒ `inline` å˜é‡ï¼šå¯ä»¥å®‰å…¨åœ°æŠŠâ€œå®šä¹‰â€æ”¾åœ¨å¤´æ–‡ä»¶é‡Œã€‚
+inline std::list<WaveEffect::WaveParticle> WaveEffect::particles{};
+inline std::mutex WaveEffect::particlesMutex{};
+inline std::atomic<bool> WaveEffect::isWaveRunning{ false };
+inline std::thread WaveEffect::waveThread{};
 
 
 
-std::vector<std::pair<int, int>> WaveEffect::trajectoryPoints;
-int WaveEffect::currentTrajectoryIndex = 0;
-float WaveEffect::progress = 0.0f;
-int WaveEffect::moveStep = 4;
-int WaveEffect::spacing = 25;
-int WaveEffect::screenWidth = 0;
-int WaveEffect::screenHeight = 0;
+inline std::vector<std::pair<int, int>> WaveEffect::trajectoryPoints{};
+inline int WaveEffect::currentTrajectoryIndex = 0;
+inline float WaveEffect::progress = 0.0f;
+inline int WaveEffect::moveStep = 4;
+inline int WaveEffect::spacing = 25;
+inline int WaveEffect::screenWidth = 0;
+inline int WaveEffect::screenHeight = 0;
+
+// å…œåº•ï¼šå¦‚æœç”¨æˆ·å¿˜äº†æ‰‹åŠ¨ StopWaveEffect()ï¼Œç¨‹åºé€€å‡ºæ—¶ä¹Ÿå°½é‡ä¸è¦å› ä¸º joinable thread è€Œç›´æ¥å´©æºƒã€‚
+// æ³¨æ„ï¼šè¿™ä¸ªææ„ä¼šåœ¨â€œæœ¬ç¿»è¯‘å•å…ƒçš„é™æ€å¯¹è±¡é”€æ¯é˜¶æ®µâ€è¿è¡Œã€‚
+inline struct WaveEffectAutoStop {
+	~WaveEffectAutoStop() noexcept {
+		// StopWaveEffect å†…éƒ¨ä¼š join çº¿ç¨‹å¹¶æ¸…ç†çª—å£
+		WaveEffect::StopWaveEffect();
+	}
+} g_waveEffectAutoStop;
 
 #endif                                                          ///< !MESSAGEBOX_WAVE_HPP
+

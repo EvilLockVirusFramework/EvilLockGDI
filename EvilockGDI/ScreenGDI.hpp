@@ -1,6 +1,6 @@
-/*****************************************************************//**
+ï»¿/*****************************************************************//**
  * @file				ScreenGDI.hpp
- * @brief				ÆÁÄ»GDI²Ù×÷
+ * @brief				å±å¹•GDIæ“ä½œ
  * 
  * @author				EvilLockVirusFramework
  * @date				2024-01-06
@@ -20,431 +20,100 @@
 
 
 /**
- * @brief														: ÆÁÄ»GDI²Ù×÷
- * @details														: ·â×°¶ÔÆÁÄ»µÄGDI²Ù×÷
+ * @brief														: å±å¹•GDIæ“ä½œ
+ * @details														: å°è£…å¯¹â€œæŸä¸ª DCï¼ˆé»˜è®¤æ¡Œé¢ DCï¼‰â€çš„ GDI æ“ä½œï¼ˆå…¼å®¹æ—§ APIï¼‰
  */
 class ScreenGDI {
 public:
-	HDC hdcDesktop;												///< ×ÀÃæÉè±¸ÉÏÏÂÎÄ
-	HDC hdcMem;													///< ÄÚ´æÉè±¸ÉÏÏÂÎÄ
-	int width;													///< ×ÀÃæÉè±¸¿í
-	int height;													///< ×ÀÃæÉè±¸¸ß
-	HBITMAP hbmTemp;											///< ÁÙÊ±Î»Í¼
-	PRGBQUAD rgbScreen;											///< ÏñËØÊı×é
+	HDC hdcDesktop;												///< æ¡Œé¢è®¾å¤‡ä¸Šä¸‹æ–‡
+	HDC hdcMem;													///< å†…å­˜è®¾å¤‡ä¸Šä¸‹æ–‡
+	int width;													///< æ¡Œé¢è®¾å¤‡å®½
+	int height;													///< æ¡Œé¢è®¾å¤‡é«˜
+	HBITMAP hbmTemp;											///< ä¸´æ—¶ä½å›¾
+	PRGBQUAD rgbScreen;											///< åƒç´ æ•°ç»„
 
 
 
 	/**
-	 * @brief														: ³õÊ¼»¯ScreenGDIÀàÄÚ²¿±äÁ¿
+	 * @brief														: åˆå§‹åŒ– ScreenGDIï¼ˆå…¼å®¹æ—§è¡Œä¸ºï¼šç›´æ¥æ“ä½œæ¡Œé¢ DCï¼‰
 	 * 
 	 * @throw				std::runtime_error
-	 *						1)	GetDC failed						: GDI ×ÊÔ´¿İ½ß»ò×ÀÃæ²»¿ÉÓÃ
-	 *						2)	CreateCompatibleDC failed			: ÎŞ·¨´´½¨¼æÈİÄÚ´æ DC
-	 *						3)	CreateDIBSection failed				: ÄÚ´æ²»×ã»ò²ÎÊıÎŞĞ§
+	 *						1)	GetDC failed						: GDI èµ„æºæ¯ç«­æˆ–æ¡Œé¢ä¸å¯ç”¨
+	 *						2)	CreateCompatibleDC failed			: æ— æ³•åˆ›å»ºå…¼å®¹å†…å­˜ DC
+	 *						3)	CreateDIBSection failed				: å†…å­˜ä¸è¶³æˆ–å‚æ•°æ— æ•ˆ
 	 */
-	ScreenGDI() {
-		hdcDesktop = GetDC(nullptr);							///< »ñÈ¡×ÀÃæÉè±¸ÉÏÏÂÎÄ
-		if (!hdcDesktop)
-			throw_runtime_error(
-				"GetDC failed: "
-				"GDI resource exhaustion "
-				"or desktop unavailable."
-			);
+	ScreenGDI();
 
-		hdcMem = CreateCompatibleDC(hdcDesktop);
-		if (!hdcMem)
-			throw_runtime_error(
-				"CreateCompatibleDC failed: "
-				"unable to create memory DC."
-			);
+	/**
+	 * @brief														: åˆå§‹åŒ– ScreenGDIï¼ˆæ–°æ¥å£ï¼šä¼ å…¥è¦æ“ä½œçš„ DCï¼‰
+	 * @details														: é€‚ç”¨äºâ€œçª—å£ DC / å†…å­˜ DC / æ‰“å°æœº DCâ€ç­‰ï¼›ä¸æ¥ç®¡å¤–éƒ¨ DC çš„é‡Šæ”¾
+	 *
+	 * @param[in]			targetDC								: ç›®æ ‡è®¾å¤‡ä¸Šä¸‹æ–‡ï¼ˆç”±è°ƒç”¨è€…ç®¡ç†ç”Ÿå‘½å‘¨æœŸï¼‰
+	 */
+	explicit ScreenGDI(HDC targetDC);
 
-		width = GetSystemMetrics(SM_CXSCREEN);					///< »ñÈ¡ÆÁÄ»¿í¶È
-		height = GetSystemMetrics(SM_CYSCREEN);					///< »ñÈ¡ÆÁÄ»¸ß¶È
-		
-		rgbScreen = nullptr;
-		BITMAPINFO bmi = { 0 };
-		bmi.bmiHeader.biSize = sizeof(BITMAPINFO);
-		bmi.bmiHeader.biWidth = width;
-		bmi.bmiHeader.biHeight = height;
-		bmi.bmiHeader.biPlanes = 1;
-		bmi.bmiHeader.biBitCount = 32;
-		bmi.bmiHeader.biCompression = BI_RGB;
-		hbmTemp = CreateDIBSection(
-			hdcMem, &bmi, DIB_RGB_COLORS,
-			reinterpret_cast<void**>(&rgbScreen), nullptr, 0
-		);														///< ´´½¨ÁÙÊ±Î»Í¼
-		if (!hbmTemp)
-		{
-			DeleteDC(hdcMem);
-			ReleaseDC(nullptr, hdcDesktop);
-			throw_runtime_error(
-				"CreateDIBSection failed: "
-				"out of memory or invalid parameters"
-			);
-		}
-		SelectObject(hdcMem, hbmTemp);							///< ¹ØÁªÏñËØÊı×é
-	}
+	/**
+	 * @brief														: åˆå§‹åŒ– ScreenGDIï¼ˆæ–°æ¥å£ï¼šä¼ å…¥ DC + æ˜¾å¼å°ºå¯¸ï¼‰
+	 * @details														: å½“ DC çš„è£å‰ªåŒºåŸŸå°ºå¯¸ä¸å¯é æ—¶ä½¿ç”¨
+	 */
+	ScreenGDI(HDC targetDC, int targetWidth, int targetHeight);
+
+	/**
+	 * @brief														: å·¥å‚å‡½æ•°ï¼šä»çª—å£åˆ›å»º ScreenGDIï¼ˆå†…éƒ¨ä¼š GetDC/ReleaseDCï¼‰
+	 */
+	static ScreenGDI FromWindow(HWND hWnd);
 
 
 
 	/**
-	 * @brief													: ÊÍ·Å GDI ×ÊÔ´
+	 * @brief													: é‡Šæ”¾ GDI èµ„æº
 	 * @details													: noexcept
 	 */
-	~ScreenGDI() noexcept
-	{
-		ReleaseDC(nullptr, hdcDesktop);							///< ÊÍ·Å×ÀÃæÉè±¸ÉÏÏÂÎÄ
-		DeleteDC(hdcMem);										///< É¾³ıÄÚ´æÉè±¸ÉÏÏÂÎÄ
-		DeleteObject(hbmTemp);									///< É¾³ıÁÙÊ±Î»Í¼
-	}
+	~ScreenGDI() noexcept;
+
+	ScreenGDI(const ScreenGDI&) = delete;
+	ScreenGDI& operator=(const ScreenGDI&) = delete;
+	ScreenGDI(ScreenGDI&& other) noexcept;
+	ScreenGDI& operator=(ScreenGDI&& other) noexcept;
 
 
 
-	void DrawImageToBitmap(HBITMAP hBitmap) const;				///< ½«´«ÈëÎ»Í¼»æÖÆµ½ÄÚ´æÉè±¸ÉÏ
+	void DrawImageToBitmap(HBITMAP hBitmap) const;				///< å°†ä¼ å…¥ä½å›¾ç»˜åˆ¶åˆ°å†…å­˜è®¾å¤‡ä¸Š
 	void LoadAndDrawImageFromResource(int resourceID) const;
 	void AdjustRGB(
 		int xStart, int yStart, int xEnd, int yEnd,
 		int rIncrease, int gIncrease, int bIncrease
-	);															///< µ÷ÕûÄ³¸ö¾ØĞÎÇøÓòRGBµÄÏà¶ÔÖµ
+	);															///< è°ƒæ•´æŸä¸ªçŸ©å½¢åŒºåŸŸRGBçš„ç›¸å¯¹å€¼
 	void SetRGB(
 		int xStart, int yStart, int xEnd, int yEnd,
 		BYTE newR, BYTE newG, BYTE newB
-	);															///< µ÷ÕûÄ³¸ö¾ØĞÎÇøÓòRGBµÄ¾ø¶ÔÖµ
-	void AdjustBrightness(float factor);						///< µ÷ÕûÁÁ¶È ·¶Î§Îª0.f¡«1.f
-	void AdjustContrast(float factor);							///< µ÷Õû¶Ô±È¶È ·¶Î§Îª0.f¡«1.f
-	void AdjustSaturation(float factor);						///< µ÷Õû±¥ºÍ¶È ·¶Î§Îª0.f¡«1.f
+	);															///< è°ƒæ•´æŸä¸ªçŸ©å½¢åŒºåŸŸRGBçš„ç»å¯¹å€¼
+	void AdjustBrightness(float factor);						///< è°ƒæ•´äº®åº¦ èŒƒå›´ä¸º0.fï½1.f
+	void AdjustContrast(float factor);							///< è°ƒæ•´å¯¹æ¯”åº¦ èŒƒå›´ä¸º0.fï½1.f
+	void AdjustSaturation(float factor);						///< è°ƒæ•´é¥±å’Œåº¦ èŒƒå›´ä¸º0.fï½1.f
+
+private:
+	struct RectI {
+		int startX;
+		int startY;
+		int endX;
+		int endY;
+	};
+
+	struct EmptyTag { explicit EmptyTag() = default; };
+	explicit ScreenGDI(EmptyTag) noexcept;
+
+	HWND releaseWnd_;											///< ä»…å½“å†…éƒ¨æŒæœ‰çª—å£ DC æ—¶ä½¿ç”¨ï¼ˆReleaseDC éœ€è¦ HWNDï¼‰
+	bool ownsDesktopDC_;										///< æ˜¯å¦æ¥ç®¡ hdcDesktop çš„é‡Šæ”¾
+	HGDIOBJ oldTempBmp_;										///< hdcMem åŸå…ˆé€‰å…¥çš„ä½å›¾ï¼ˆææ„æ—¶è¿˜åŸï¼‰
+
+	void Reset_() noexcept;
+	void Init_(HDC targetDC, int targetWidth, int targetHeight, bool ownsDc, HWND releaseWnd);
+	void Capture_() const;										///< ç›®æ ‡ DC -> å†…å­˜ DIB
+	void Present_() const;										///< å†…å­˜ DIB -> ç›®æ ‡ DC
+	[[nodiscard]] RectI ClampRect_(int xStart, int yStart, int xEnd, int yEnd) const;
+	void EnsurePixels_() const;
 };
-
-
-
-/** 
- * @brief														: ½«´«ÈëÎ»Í¼»æÖÆµ½ÄÚ´æÉè±¸ÉÏ
- * 
- * @param[in]			hBitmap									: ´«ÈëÎ»Í¼
- * 
- * @throw				std::runtime_error
- *						1)	CreateCompatibleDC Ê§°Ü				: ÎŞ·¨´´½¨¼æÈİÄÚ´æ DC
- *						2)	SelectObject Ê§°Ü					: hBitmap ÎŞĞ§»òÓë hdcBitmap ²»¼æÈİ
- *						3)	GetObject Ê§°Ü						: ÎŞ·¨»ñÈ¡Î»Í¼ÊôĞÔ
- *						4)	BitBlt Ê§°Ü							: DC²»¼æÈİ»ò»æÖÆÇøÓòÔ½½ç
- */
-void ScreenGDI::DrawImageToBitmap(HBITMAP hBitmap) const
-{
-	HDC hdcBitmap = CreateCompatibleDC(hdcMem);
-	if (!hdcBitmap)
-		throw_runtime_error(
-			"CreateCompatibleDC failed: "
-			"unable to create memory DC."
-		);
-
-	HGDIOBJ hOldBmp = SelectObject(hdcBitmap, hBitmap);
-	if (hOldBmp == nullptr || hOldBmp == HGDI_ERROR)
-	{
-		DeleteDC(hdcBitmap);
-		throw_runtime_error(
-			"SelectObject failed: "
-			"hBitmap invalid or incompatible."
-		);
-	}
-
-	BITMAP bmp{};
-	if (!GetObject(hBitmap, sizeof(BITMAP), &bmp))
-	{
-		SelectObject(hdcBitmap, hOldBmp);						///< »¹Ô­³ÉÔ­HBITMAP
-		DeleteDC(hdcBitmap);
-		throw_runtime_error(
-			"GetObject failed: "
-			"hBitmap is not a valid HBITMAP."
-		);
-	}
-
-	if (!BitBlt(hdcMem,
-		0, 0, bmp.bmWidth, bmp.bmHeight,
-		hdcBitmap, 0, 0, SRCCOPY))
-	{
-		SelectObject(hdcBitmap, hOldBmp);						///< »¹Ô­³ÉÔ­HBITMAP
-		DeleteDC(hdcBitmap);
-		throw_runtime_error(
-			"BitBlt failed: "
-			"incompatible DC or rectangle out of bounds."
-		);
-	}
-
-	SelectObject(hdcBitmap, hOldBmp);
-	DeleteDC(hdcBitmap);										///< »¹Ô­³ÉÔ­HBITMAP²¢É¾È¥¼æÈİÄÚ´æDC
-}
-
-
-
-/**
- * @brief														: µ÷ÕûÄ³¸ö¾ØĞÎÇøÓòRGBµÄÏà¶ÔÖµ
- * @details														: »ùÓÚÃ¿ÏñËØÔ­ÓĞRGB½øĞĞµ÷Õû£¨ÕıÊıÊÇÔö¼Ó,¸ºÊıÊÇ¼õÉÙ£©
- * 
- * @param[in]			xStart									: ¾ØĞÎ×óÉÏ½ÇX×ø±ê
- * @param[in]			yStart									: ¾ØĞÎ×óÉÏ½ÇY×ø±ê
- * @param[in]			xEnd									: ¾ØĞÎÓÒÏÂ½ÇX×ø±ê
- * @param[in]			yEnd									: ¾ØĞÎÓÒÏÂ½ÇY×ø±ê
- * @param[in]			rIncrease								: Ã¿ÏñËØRedÔö³¤Öµ
- * @param[in]			gIncrease								: Ã¿ÏñËØGreenÔö³¤Öµ
- * @param[in]			bIncrease								: Ã¿ÏñËØBlueÔö³¤Öµ
- * 
- * @throw				std::runtime_error
- *						1)	BitBlt Ê§°Ü							: DC²»¼æÈİ»ò»æÖÆÇøÓòÔ½½ç
- *						2)	AdjustRGB Ê§°Ü						: ³¢ÊÔÊ¹ÓÃÒ»¸öÎŞĞ§¾ØĞÎÇøÓò
- *						3)	AdjustRGB Ê§°Ü						: rgbScreen Î´³õÊ¼»¯
- */
-void ScreenGDI::AdjustRGB(
-	int xStart, int yStart, int xEnd, int yEnd,
-	int rIncrease, int gIncrease, int bIncrease
-)
-{
-	if (!BitBlt(
-		hdcMem, 0, 0, width, height,
-		hdcDesktop, 0, 0, SRCCOPY
-	))
-		throw_runtime_error(
-			"BitBlt(hdcMem) failed: "
-			"incompatible DC or rectangle out of bounds."
-		);
-
-	int startX = std::clamp(xStart, 0, width - 1);
-	int startY = std::clamp(yStart, 0, height - 1);
-	int endX = std::clamp(xEnd, 0, width - 1);
-	int endY = std::clamp(yEnd, 0, height - 1);
-	if (startX > endX || startY > endY)
-		throw_runtime_error(
-			"AdjustRGB failed: "
-			"try to use an invalid rectangle."
-		);
-	if (rgbScreen == nullptr)
-		throw_runtime_error(
-			"AdjustRGB failed: "
-			"rgbScreen invalid."
-		);
-
-	for (int y = startY; y <= endY; y++) {
-		for (int x = startX; x <= endX; x++) {
-			int index = y * width + x;
-			BYTE newR = min(255, max(0, rgbScreen[index].r + rIncrease));
-			BYTE newG = min(255, max(0, rgbScreen[index].g + gIncrease));
-			BYTE newB = min(255, max(0, rgbScreen[index].b + bIncrease));
-			rgbScreen[index].r = newR;
-			rgbScreen[index].g = newG;
-			rgbScreen[index].b = newB;
-		}
-	}															///< Ìî³äÄ¿±êÇøÓò
-	
-	if(!BitBlt(
-		hdcDesktop, 0, 0, width, height, 
-		hdcMem, 0, 0, SRCCOPY
-	))
-		throw_runtime_error(
-			"BitBlt(hdcDesktop) failed: "
-			"incompatible DC or rectangle out of bounds."
-		);
-}
-
-
-
-/**
- * @brief														: µ÷ÕûÄ³¸ö¾ØĞÎÇøÓòRGBµÄ¾ø¶ÔÖµ
- * @details														: Ö±½ÓĞŞ¸ÄÄ³¸ö¾ØĞÎÇøÓòÄÚµÄRGB
- * 
- * @param[in]			xStart									: ¾ØĞÎ×óÉÏ½ÇX×ø±ê
- * @param[in]			yStart									: ¾ØĞÎ×óÉÏ½ÇY×ø±ê
- * @param[in]			xEnd									: ¾ØĞÎÓÒÏÂ½ÇX×ø±ê
- * @param[in]			yEnd									: ¾ØĞÎÓÒÏÂ½ÇY×ø±ê
- * @param[in]			newR									: Ã¿ÏñËØµÄRedÖµ
- * @param[in]			newG									: Ã¿ÏñËØµÄGreenÖµ
- * @param[in]			newB									: Ã¿ÏñËØµÄBlueÖµ
- * 
- * @throw				std::runtime_error
- *						1)	BitBlt Ê§°Ü							: DC²»¼æÈİ»ò»æÖÆÇøÓòÔ½½ç
- *						2)	AdjustRGB Ê§°Ü						: ³¢ÊÔÊ¹ÓÃÒ»¸öÎŞĞ§¾ØĞÎÇøÓò
- *						3)	AdjustRGB Ê§°Ü						: rgbScreen Î´³õÊ¼»¯
- */
-void ScreenGDI::SetRGB(
-	int xStart, int yStart, int xEnd, int yEnd,
-	BYTE newR, BYTE newG, BYTE newB
-)
-{
-	if (!BitBlt(
-		hdcMem, 0, 0, width, height,
-		hdcDesktop, 0, 0, SRCCOPY
-	))
-		throw_runtime_error(
-			"BitBlt(hdcMem) failed: "
-			"incompatible DC or rectangle out of bounds."
-		);
-
-	int startX = std::clamp(xStart, 0, width - 1);
-	int startY = std::clamp(yStart, 0, height - 1);
-	int endX = std::clamp(xEnd, 0, width - 1);
-	int endY = std::clamp(yEnd, 0, height - 1);
-	if (startX > endX || startY > endY)
-		throw_runtime_error(
-			"SetRGB failed: "
-			"try to use an invalid rectangle."
-		);
-	if (rgbScreen == nullptr)
-		throw_runtime_error(
-			"SetRGB failed: "
-			"rgbScreen invalid."
-		);
-
-	for (int y = startY; y <= endY; y++) {
-		for (int x = startX; x <= endX; x++) {
-			int index = y * width + x;
-			rgbScreen[index].r = newR;
-			rgbScreen[index].g = newG;
-			rgbScreen[index].b = newB;
-		}
-	}
-
-	if (!BitBlt(
-		hdcDesktop, 0, 0, width, height,
-		hdcMem, 0, 0, SRCCOPY
-	))
-		throw_runtime_error(
-			"BitBlt(hdcDesktop) failed: "
-			"incompatible DC or rectangle out of bounds."
-		);
-}
-
-
-
-/**
- * @brief														: µ÷Õû×ÀÃæÉè±¸µÄÁÁ¶È
- * @details														: µ± factor Ğ¡ÓÚµÈÓÚ 0 Ê±ÎªÈ«ºÚ
- * 
- * @param[in]			factor									: ÁÁ¶ÈÏµÊı
- * 
- * @throw				std::runtime_error
- *						1)	AdjustBrightness Ê§°Ü				: rgbScreen Î´³õÊ¼»¯
- *						2)	BitBlt Ê§°Ü							: DC²»¼æÈİ»ò»æÖÆÇøÓòÔ½½ç
- */
-void ScreenGDI::AdjustBrightness(float factor) {
-	if (rgbScreen == nullptr)
-		throw_runtime_error(
-			"AdjustBrightness failed: "
-			"rgbScreen invalid."
-		);
-
-	if (!BitBlt(
-		hdcMem, 0, 0, width, height,
-		hdcDesktop, 0, 0, SRCCOPY
-	))
-		throw_runtime_error(
-			"BitBlt(hdcMem) failed: "
-			"incompatible DC or rectangle out of bounds."
-		);
-
-	for (int i = 0; i < width * height; i++) {
-		HSLQUAD hsl = RGBToHSL(rgbScreen[i]);
-		hsl.l *= factor;
-		hsl.l = std::clamp(hsl.l, 0.0f, 1.0f);
-		rgbScreen[i] = HSLToRGB(hsl);
-	}
-
-	if (!BitBlt(
-		hdcDesktop, 0, 0, width, height,
-		hdcMem, 0, 0, SRCCOPY
-	))
-		throw_runtime_error(
-			"BitBlt(hdcDesktop) failed: "
-			"incompatible DC or rectangle out of bounds."
-		);
-}
-
-
-
-
-/**
- * @brief														: µ÷Õû×ÀÃæÉè±¸µÄ¶Ô±È¶È
- *
- * @param[in]			factor									: ¶Ô±È¶ÈÏµÊı
- * 
- * @throw				std::runtime_error
- *						1)	AdjustContrast Ê§°Ü					: rgbScreen Î´³õÊ¼»¯
- *						2)	BitBlt Ê§°Ü							: DC²»¼æÈİ»ò»æÖÆÇøÓòÔ½½ç
- */
-void ScreenGDI::AdjustContrast(float factor) {
-	if (rgbScreen == nullptr)
-		throw_runtime_error(
-			"AdjustContrast failed: "
-			"rgbScreen invalid."
-		);
-
-	if (!BitBlt(
-		hdcMem, 0, 0, width, height,
-		hdcDesktop, 0, 0, SRCCOPY
-	))
-		throw_runtime_error(
-			"BitBlt(hdcMem) failed: "
-			"incompatible DC or rectangle out of bounds."
-		);
-
-	for (int i = 0; i < width * height; i++) {
-		HSLQUAD hsl = RGBToHSL(rgbScreen[i]);
-		hsl.l = 0.5f + (hsl.l - 0.5f) * factor;
-		hsl.l = std::clamp(hsl.l, 0.0f, 1.0f);
-		rgbScreen[i] = HSLToRGB(hsl);
-	}
-
-	if (!BitBlt(
-		hdcDesktop, 0, 0, width, height,
-		hdcMem, 0, 0, SRCCOPY
-	))
-		throw_runtime_error(
-			"BitBlt(hdcDesktop) failed: "
-			"incompatible DC or rectangle out of bounds."
-		);
-}
-
-
-
-/**
- * @brief														: µ÷Õû×ÀÃæÉè±¸µÄ±¥ºÍ¶È
- *
- * @param[in]			factor									: ±¥ºÍ¶ÈÏµÊı
- * 
- * @throw				std::runtime_error
- *						1)	AdjustSaturation Ê§°Ü				: rgbScreen Î´³õÊ¼»¯
- *						2)	BitBlt Ê§°Ü							: DC²»¼æÈİ»ò»æÖÆÇøÓòÔ½½ç
- */
-void ScreenGDI::AdjustSaturation(float factor) {
-	if (rgbScreen == nullptr)
-		throw_runtime_error(
-			"AdjustSaturation failed: "
-			"rgbScreen invalid."
-		);
-
-	if (!BitBlt(
-		hdcMem, 0, 0, width, height,
-		hdcDesktop, 0, 0, SRCCOPY
-	))
-		throw_runtime_error(
-			"BitBlt(hdcMem) failed: "
-			"incompatible DC or rectangle out of bounds."
-		);
-
-	for (int i = 0; i < width * height; i++) {
-		HSLQUAD hsl = RGBToHSL(rgbScreen[i]);
-		hsl.s *= factor;
-		hsl.s = std::clamp(hsl.s, 0.0f, 1.0f);
-		rgbScreen[i] = HSLToRGB(hsl);
-	}
-
-	if (!BitBlt(
-		hdcDesktop, 0, 0, width, height,
-		hdcMem, 0, 0, SRCCOPY
-	))
-		throw_runtime_error(
-			"BitBlt(hdcDesktop) failed: "
-			"incompatible DC or rectangle out of bounds."
-		);
-}
-
 
 
 #endif															///< !SCREEN_GDI_HPP

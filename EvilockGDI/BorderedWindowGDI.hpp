@@ -1,6 +1,6 @@
 /*****************************************************************//**
  * @file				Window.hpp
- * @brief				ÓĞ±ß¿ò´°¿ÚGDI²Ù×÷
+ * @brief				æœ‰è¾¹æ¡†çª—å£GDIæ“ä½œ
  *
  * @author				EvilLockVirusFramework
  * @date				2024-01-06
@@ -16,36 +16,38 @@
 #pragma once
 #include "common.hpp"
 #include "color.hpp"
+#include "gdi_raii.hpp"
 
 
 
 /**
- * @brief														: ÓĞ±ß¿ò´°¿ÚGDI²Ù×÷
- * @details														: ·â×°¶ÔÓĞ±ß¿ò´°¿ÚµÄGDI²Ù×÷
+ * @brief														: æœ‰è¾¹æ¡†çª—å£GDIæ“ä½œ
+ * @details														: å°è£…å¯¹æœ‰è¾¹æ¡†çª—å£çš„GDIæ“ä½œ
  */
 class BorderedWindowGDI {
 public:
-	HWND hWnd;													///< ´°¿Ú¾ä±ú
-	HINSTANCE hInstance;										///< ³ÌĞòÊµÀı¾ä±ú
-	int xPos;													///< X ×ø±ê
-	int yPos;													///< Y ×ø±ê
-	int windowWidth;											///< ´°¿Ú¿í
-	int windowHeight;											///< ´°¿Ú¸ß
-	HDC hdcWindow;												///< ´°¿ÚÉÏÏÂÎÄ
-	HDC hdcMem;													///< ÄÚ´æÉè±¸ÉÏÏÂÎÄ
-	HBITMAP hbmTemp;											///< ÁÙÊ±Î»Í¼
-	PRGBQUAD rgbScreen;											///< ÏñËØÊı×é
+	HWND hWnd;													///< çª—å£å¥æŸ„
+	HINSTANCE hInstance;										///< ç¨‹åºå®ä¾‹å¥æŸ„
+	int xPos;													///< X åæ ‡
+	int yPos;													///< Y åæ ‡
+	int windowWidth;											///< çª—å£å®½
+	int windowHeight;											///< çª—å£é«˜
+	HDC hdcWindow;												///< çª—å£ä¸Šä¸‹æ–‡
+	HDC hdcMem;													///< å†…å­˜è®¾å¤‡ä¸Šä¸‹æ–‡
+	HBITMAP hbmTemp;											///< ä¸´æ—¶ä½å›¾
+	HGDIOBJ oldTempBmp;										///< hdcMem åŸå…ˆé€‰å…¥çš„ä½å›¾ï¼ˆææ„/é‡å»ºæ—¶è¿˜åŸï¼‰
+	PRGBQUAD rgbScreen;											///< åƒç´ æ•°ç»„
 
 
 
 	/**
-	 * @brief													: ³õÊ¼»¯´°¿ÚÀà
+	 * @brief													: åˆå§‹åŒ–çª—å£ç±»
 	 *
-	 * @param[in]		hInstance								: ³ÌĞòÊµÀı¾ä±ú
-	 * @param[in]		x										: X ×ø±ê
-	 * @param[in]		y										: Y ×ø±ê
-	 * @param[in]		width									: ´°¿Ú¿í¶È
-	 * @param[in]		height									: ´°¿Ú¸ß¶È
+	 * @param[in]		hInstance								: ç¨‹åºå®ä¾‹å¥æŸ„
+	 * @param[in]		x										: X åæ ‡
+	 * @param[in]		y										: Y åæ ‡
+	 * @param[in]		width									: çª—å£å®½åº¦
+	 * @param[in]		height									: çª—å£é«˜åº¦
 	 */
 	BorderedWindowGDI(
 		HINSTANCE hInstance,
@@ -55,29 +57,34 @@ public:
 		xPos(x), yPos(y),
 		windowWidth(width), windowHeight(height),
 		hdcWindow(nullptr), hdcMem(nullptr),
-		hbmTemp(nullptr), rgbScreen(nullptr) {}
+		hbmTemp(nullptr), oldTempBmp(nullptr), rgbScreen(nullptr) {}
 
 
 
 	/**
-	 * @brief													: ÊÍ·Å GDI ×ÊÔ´
+	 * @brief													: é‡Šæ”¾ GDI èµ„æº
 	 * @details													: noexcept
 	 */
 	~BorderedWindowGDI() noexcept
 	{
-		if (hdcWindow) ReleaseDC(hWnd, hdcWindow);				///< ÊÍ·Å´°¿ÚÉè±¸ÉÏÏÂÎÄ
-		if (hdcMem) DeleteDC(hdcMem);							///< É¾³ıÄÚ´æÉè±¸ÉÏÏÂÎÄ
-		if (hbmTemp) DeleteObject(hbmTemp);						///< É¾³ıÁÙÊ±Î»Í¼
+		// é‡è¦ï¼šåˆ é™¤ä½å›¾å‰å…ˆæŠŠ DC é‡Œçš„â€œæ—§å¯¹è±¡â€è¿˜åŸå‡ºæ¥ï¼Œé¿å…åˆ é™¤â€œæ­£åœ¨è¢«é€‰å…¥ DC çš„å¯¹è±¡â€å¯¼è‡´æœªå®šä¹‰è¡Œä¸ºã€‚
+		if (hdcMem && oldTempBmp && oldTempBmp != HGDI_ERROR)
+		{
+			SelectObject(hdcMem, oldTempBmp);
+		}
+		if (hbmTemp) DeleteObject(hbmTemp);						///< åˆ é™¤ä¸´æ—¶ä½å›¾
+		if (hdcMem) DeleteDC(hdcMem);							///< åˆ é™¤å†…å­˜è®¾å¤‡ä¸Šä¸‹æ–‡
+		if (hdcWindow) ReleaseDC(hWnd, hdcWindow);				///< é‡Šæ”¾çª—å£è®¾å¤‡ä¸Šä¸‹æ–‡
 	}
 
 
 
 	/**
-	 * @brief													: ´´½¨´ø±ß¿òµÄ´°¿Ú
+	 * @brief													: åˆ›å»ºå¸¦è¾¹æ¡†çš„çª—å£
 	 *
-	 * @param[in]		className								: ´°¿ÚÀàÃû,Ä¬ÈÏÎª "hopejieshuo"
-	 * @param[in]		windowTitle								: ´°¿Ú±êÌâ,Ä¬ÈÏÎª "EvilLock"
-	 * @param[in]		style									: ´°¿ÚÑùÊ½,Ä¬ÈÏÎª±ê×¼ÖØµş´°¿Ú
+	 * @param[in]		className								: çª—å£ç±»å,é»˜è®¤ä¸º "hopejieshuo"
+	 * @param[in]		windowTitle								: çª—å£æ ‡é¢˜,é»˜è®¤ä¸º "EvilLock"
+	 * @param[in]		style									: çª—å£æ ·å¼,é»˜è®¤ä¸ºæ ‡å‡†é‡å çª—å£
 	 */
 	void Create(
 		const std::string className = "hopejieshuo",
@@ -96,13 +103,13 @@ public:
 
 		RegisterClassA(&wc);
 
-		RECT rect = { 0, 0, windowWidth, windowHeight };		///< µ÷Õû´°¿Ú´óĞ¡ÒÔÊÊÓ¦±ß¿ò
+		RECT rect = { 0, 0, windowWidth, windowHeight };		///< è°ƒæ•´çª—å£å¤§å°ä»¥é€‚åº”è¾¹æ¡†
 		AdjustWindowRect(&rect, style, FALSE);
 		int adjustedWidth = rect.right - rect.left;
 		int adjustedHeight = rect.bottom - rect.top;
 
 		hWnd = CreateWindowExA(
-			0,													///< ÎŞÀ©Õ¹ÑùÊ½
+			0,													///< æ— æ‰©å±•æ ·å¼
 			className.c_str(),
 			windowTitle.c_str(),
 			style,
@@ -112,7 +119,7 @@ public:
 
 		if (hWnd == nullptr) return;
 
-		initialization();										///< ³õÊ¼»¯ GDI ×ÊÔ´
+		initialization();										///< åˆå§‹åŒ– GDI èµ„æº
 		ShowWindow(hWnd, SW_SHOW);
 		UpdateWindow(hWnd);
 	}
@@ -120,12 +127,12 @@ public:
 
 
 	/**
-	 * @brief													: ÅĞ¶Ï´°¿ÚÊÇ·ñÅöµ½ÆÁÄ»±ßÔµ
-	 * @return													: ·µ»ØÖµº¬Òå:0 ²»Åöµ½±ßÔµ,1 Åöµ½±ßÔµ·´µ¯,2 Åöµ½±ßÔµÍ£Ö¹
+	 * @brief													: åˆ¤æ–­çª—å£æ˜¯å¦ç¢°åˆ°å±å¹•è¾¹ç¼˜
+	 * @return													: è¿”å›å€¼å«ä¹‰:0 ä¸ç¢°åˆ°è¾¹ç¼˜,1 ç¢°åˆ°è¾¹ç¼˜åå¼¹,2 ç¢°åˆ°è¾¹ç¼˜åœæ­¢
 	 *
-	 * @param[in]		deltaX									: ´°¿Ú½«ÒªÒÆ¶¯µÄXÖá¾àÀë
-	 * @param[in]		deltaY									: ´°¿Ú½«ÒªÒÆ¶¯µÄYÖá¾àÀë
-	 * @param[in]		mode									: Åöµ½±ßÔµÊ±µÄ´¦Àí·½Ê½
+	 * @param[in]		deltaX									: çª—å£å°†è¦ç§»åŠ¨çš„Xè½´è·ç¦»
+	 * @param[in]		deltaY									: çª—å£å°†è¦ç§»åŠ¨çš„Yè½´è·ç¦»
+	 * @param[in]		mode									: ç¢°åˆ°è¾¹ç¼˜æ—¶çš„å¤„ç†æ–¹å¼
 	 */
 	int IsAtEdge(int deltaX, int deltaY, int mode) const
 	{
@@ -133,7 +140,7 @@ public:
 		RECT rect;
 		GetClientRect(GetDesktopWindow(), &rect);
 
-		RECT windowRect;										///<¡¡»ñÈ¡´°¿ÚÊµ¼Ê´óĞ¡
+		RECT windowRect;										///<ã€€è·å–çª—å£å®é™…å¤§å°
 		GetWindowRect(hWnd, &windowRect);
 		int actualWidth = windowRect.right - windowRect.left;
 		int actualHeight = windowRect.bottom - windowRect.top;
@@ -153,11 +160,11 @@ public:
 
 
 	/**
-	 * @brief													: ÒÆ¶¯´°¿Ú
+	 * @brief													: ç§»åŠ¨çª—å£
 	 *
-	 * @param[in]		deltaX									: ´°¿Ú½«ÒªÒÆ¶¯µÄXÖá¾àÀë
-	 * @param[in]		deltaY									: ´°¿Ú½«ÒªÒÆ¶¯µÄYÖá¾àÀë
-	 * @param[in]		mode									: Åöµ½±ßÔµÊ±µÄ´¦Àí·½Ê½
+	 * @param[in]		deltaX									: çª—å£å°†è¦ç§»åŠ¨çš„Xè½´è·ç¦»
+	 * @param[in]		deltaY									: çª—å£å°†è¦ç§»åŠ¨çš„Yè½´è·ç¦»
+	 * @param[in]		mode									: ç¢°åˆ°è¾¹ç¼˜æ—¶çš„å¤„ç†æ–¹å¼
 	 */
 	void Move(int deltaX, int deltaY, int mode)
 	{
@@ -165,7 +172,7 @@ public:
 		RECT rect;
 		GetClientRect(GetDesktopWindow(), &rect);
 
-		RECT windowRect;										///<¡¡»ñÈ¡´°¿ÚÊµ¼Ê´óĞ¡
+		RECT windowRect;										///<ã€€è·å–çª—å£å®é™…å¤§å°
 		GetWindowRect(hWnd, &windowRect);
 		int actualWidth = windowRect.right - windowRect.left;
 		int actualHeight = windowRect.bottom - windowRect.top;
@@ -198,10 +205,10 @@ public:
 
 
 	/**
-	 * @brief													: ÏòÉÏÒÆ¶¯´°¿Ú
+	 * @brief													: å‘ä¸Šç§»åŠ¨çª—å£
 	 * 
-	 * @param[in]		dt										: ÒÆ¶¯¾àÀë
-	 * @param[in]		mode									: Åöµ½±ßÔµÊ±µÄ´¦Àí·½Ê½
+	 * @param[in]		dt										: ç§»åŠ¨è·ç¦»
+	 * @param[in]		mode									: ç¢°åˆ°è¾¹ç¼˜æ—¶çš„å¤„ç†æ–¹å¼
 	 */
 	void MoveUp(int dt, int mode) {
 		AutoUpdate();
@@ -211,10 +218,10 @@ public:
 
 
 	/**
-	 * @brief													: ÏòÏÂÒÆ¶¯´°¿Ú
+	 * @brief													: å‘ä¸‹ç§»åŠ¨çª—å£
 	 * 
-	 * @param[in]		dt										: ÒÆ¶¯¾àÀë
-	 * @param[in]		mode									: Åöµ½±ßÔµÊ±µÄ´¦Àí·½Ê½
+	 * @param[in]		dt										: ç§»åŠ¨è·ç¦»
+	 * @param[in]		mode									: ç¢°åˆ°è¾¹ç¼˜æ—¶çš„å¤„ç†æ–¹å¼
 	 */
 	void MoveDown(int dt, int mode) {
 		AutoUpdate();
@@ -224,10 +231,10 @@ public:
 
 
 	/**
-	 * @brief													: Ïò×óÒÆ¶¯´°¿Ú
+	 * @brief													: å‘å·¦ç§»åŠ¨çª—å£
 	 * 
-	 * @param[in]		dt										: ÒÆ¶¯¾àÀë
-	 * @param[in]		mode									: Åöµ½±ßÔµÊ±µÄ´¦Àí·½Ê½
+	 * @param[in]		dt										: ç§»åŠ¨è·ç¦»
+	 * @param[in]		mode									: ç¢°åˆ°è¾¹ç¼˜æ—¶çš„å¤„ç†æ–¹å¼
 	 */
 	void MoveLeft(int dt, int mode) {
 		AutoUpdate();
@@ -237,10 +244,10 @@ public:
 
 
 	/**
-	 * @brief													: ÏòÓÒÒÆ¶¯´°¿Ú
+	 * @brief													: å‘å³ç§»åŠ¨çª—å£
 	 * 
-	 * @param[in]		dt										: ÒÆ¶¯¾àÀë
-	 * @param[in]		mode									: Åöµ½±ßÔµÊ±µÄ´¦Àí·½Ê½
+	 * @param[in]		dt										: ç§»åŠ¨è·ç¦»
+	 * @param[in]		mode									: ç¢°åˆ°è¾¹ç¼˜æ—¶çš„å¤„ç†æ–¹å¼
 	 */
 	void MoveRight(int dt, int mode) {
 		AutoUpdate();
@@ -250,10 +257,10 @@ public:
 
 
 	/**
-	 * @brief													: ´°¿Ú»Î¶¯
+	 * @brief													: çª—å£æ™ƒåŠ¨
 	 * 
-	 * @param[in]		shakeCount								: »Î¶¯´ÎÊı,Ä¬ÈÏ8´Î
-	 * @param[in]		maxIntensity							: ×î´ó»Î¶¯Ç¿¶È,Ä¬ÈÏ15ÏñËØ
+	 * @param[in]		shakeCount								: æ™ƒåŠ¨æ¬¡æ•°,é»˜è®¤8æ¬¡
+	 * @param[in]		maxIntensity							: æœ€å¤§æ™ƒåŠ¨å¼ºåº¦,é»˜è®¤15åƒç´ 
 	 */
 	void Shake(int shakeCount = 8, int maxIntensity = 15) {
 		AutoUpdate();
@@ -263,7 +270,7 @@ public:
 		for (int i = 0; i < shakeCount; i++) {
 			float decay = static_cast<float>(shakeCount - i) / shakeCount;
 			int currentIntensity = static_cast<int>(
-				maxIntensity * decay);							///< ¼ÆËãË¥¼õµÄÇ¿¶È
+				maxIntensity * decay);							///< è®¡ç®—è¡°å‡çš„å¼ºåº¦
 
 			if (currentIntensity < 1) currentIntensity = 1;
 
@@ -275,7 +282,7 @@ public:
 			SetWindowPos(hWnd, nullptr,
 				originalX - currentIntensity, originalY,
 				0, 0, SWP_NOSIZE | SWP_NOZORDER);
-			Sleep(30);											///< ×óÓÒ»Î¶¯
+			Sleep(30);											///< å·¦å³æ™ƒåŠ¨
 
 			SetWindowPos(hWnd, nullptr,
 				originalX, originalY + currentIntensity,
@@ -285,26 +292,26 @@ public:
 			SetWindowPos(hWnd, nullptr,
 				originalX, originalY - currentIntensity,
 				0, 0, SWP_NOSIZE | SWP_NOZORDER);
-			Sleep(30);											///< ÉÏÏÂ»Î¶¯
+			Sleep(30);											///< ä¸Šä¸‹æ™ƒåŠ¨
 		}
 
 		SetWindowPos(hWnd, nullptr,
 			originalX, originalY,
-			0, 0, SWP_NOSIZE | SWP_NOZORDER);					///< »Ö¸´Ô­Ê¼Î»ÖÃ
+			0, 0, SWP_NOSIZE | SWP_NOZORDER);					///< æ¢å¤åŸå§‹ä½ç½®
 	}
 
 
 
 	/**
-	 * @brief													: ×Ô¶¯¸üĞÂ´°¿ÚÄÚÈİ
-	 * @details													: Èç¹û´°¿ÚÄÚÈİ±»ĞŞ¸Ä,Ôò¸üĞÂÄÚ´æÉè±¸ÉÏÏÂÎÄºÍÏñËØÊı×é
+	 * @brief													: è‡ªåŠ¨æ›´æ–°çª—å£å†…å®¹
+	 * @details													: å¦‚æœçª—å£å†…å®¹è¢«ä¿®æ”¹,åˆ™æ›´æ–°å†…å­˜è®¾å¤‡ä¸Šä¸‹æ–‡å’Œåƒç´ æ•°ç»„
 	 * 
-	 * @param[in]		angle									: Ğı×ª½Ç¶È,ÕıÖµÎªË³Ê±Õë,¸ºÖµÎªÄæÊ±Õë
-	 * @param[in]		zoomX									: XÖáËõ·Å±ÈÀı,Ä¬ÈÏ1
-	 * @param[in]		zoomY									: YÖáËõ·Å±ÈÀı,Ä¬ÈÏ1
-	 * @param[in]		offsetX									: XÖáÆ«ÒÆÁ¿,Ä¬ÈÏ0
-	 * @param[in]		offsetY									: YÖáÆ«ÒÆÁ¿,Ä¬ÈÏ0
-	 * @param[in]		center									: Ğı×ªÖĞĞÄ,Ä¬ÈÏ´°¿ÚÖĞĞÄ
+	 * @param[in]		angle									: æ—‹è½¬è§’åº¦,æ­£å€¼ä¸ºé¡ºæ—¶é’ˆ,è´Ÿå€¼ä¸ºé€†æ—¶é’ˆ
+	 * @param[in]		zoomX									: Xè½´ç¼©æ”¾æ¯”ä¾‹,é»˜è®¤1
+	 * @param[in]		zoomY									: Yè½´ç¼©æ”¾æ¯”ä¾‹,é»˜è®¤1
+	 * @param[in]		offsetX									: Xè½´åç§»é‡,é»˜è®¤0
+	 * @param[in]		offsetY									: Yè½´åç§»é‡,é»˜è®¤0
+	 * @param[in]		center									: æ—‹è½¬ä¸­å¿ƒ,é»˜è®¤çª—å£ä¸­å¿ƒ
 	 */
 	void Rotate(
 		float angle, float zoomX = 1, float zoomY = 1,
@@ -348,9 +355,9 @@ public:
 
 
 	/**
-	 * @brief													: Ïò×óĞı×ª´°¿ÚÄÚÈİ
+	 * @brief													: å‘å·¦æ—‹è½¬çª—å£å†…å®¹
 	 * 
-	 * @param[in]		angle									: Ğı×ª½Ç¶È
+	 * @param[in]		angle									: æ—‹è½¬è§’åº¦
 	 */
 	void turnLeft(float angle) const {
 		AutoUpdate();
@@ -360,9 +367,9 @@ public:
 
 
 	/**
-	 * @brief													: ÏòÓÒĞı×ª´°¿ÚÄÚÈİ
+	 * @brief													: å‘å³æ—‹è½¬çª—å£å†…å®¹
 	 * 
-	 * @param[in]		angle									: Ğı×ª½Ç¶È
+	 * @param[in]		angle									: æ—‹è½¬è§’åº¦
 	 */
 	void turnRight(float angle) const {
 		AutoUpdate();
@@ -372,56 +379,55 @@ public:
 
 
 	/**
-	 * @brief													: »æÖÆÍ¼Ïñµ½Î»Í¼
+	 * @brief													: ç»˜åˆ¶å›¾åƒåˆ°ä½å›¾
 	 * 
-	 * @param[in]		hBitmap									: Î»Í¼¾ä±ú
+	 * @param[in]		hBitmap									: ä½å›¾å¥æŸ„
 	 */
 	void DrawImageToBitmap(HBITMAP hBitmap) const {
 		AutoUpdate();
-		HDC hdcBitmap = CreateCompatibleDC(hdcMem);
-		SelectObject(hdcBitmap, hBitmap);
+		evgdi::win::unique_hdc hdcBitmap(CreateCompatibleDC(hdcMem));
+		if (!hdcBitmap) return;
+		evgdi::win::select_object_guard bmpSel(hdcBitmap.get(), hBitmap);
 
 		BITMAP bmpInfo{};
 		GetObject(hBitmap, sizeof(BITMAP), &bmpInfo);
 		int bmpWidth = bmpInfo.bmWidth;
 		int bmpHeight = bmpInfo.bmHeight;
 
-		RECT clientRect;										///< »ñÈ¡¿Í»§Çø´óĞ¡
+		RECT clientRect;										///< è·å–å®¢æˆ·åŒºå¤§å°
 		GetClientRect(hWnd, &clientRect);
 		int clientWidth = clientRect.right - clientRect.left;
 		int clientHeight = clientRect.bottom - clientRect.top;
 
 		int startX = (clientWidth - bmpWidth) / 2;
-		int startY = (clientHeight - bmpHeight) / 2;			///< ¼ÆËã¾ÓÖĞÎ»ÖÃ
+		int startY = (clientHeight - bmpHeight) / 2;			///< è®¡ç®—å±…ä¸­ä½ç½®
 
 		BitBlt(hdcMem, startX, startY, bmpWidth, bmpHeight,
-			hdcBitmap, 0, 0, SRCCOPY);							///< »æÖÆÍ¼Ïñµ½ÄÚ´æÉè±¸ÉÏÏÂÎÄ
-
-		DeleteDC(hdcBitmap);
-		InvalidateRect(hWnd, nullptr, TRUE);					///< ´¥·¢ÖØ»æ
+			hdcBitmap.get(), 0, 0, SRCCOPY);					///< ç»˜åˆ¶å›¾åƒåˆ°å†…å­˜è®¾å¤‡ä¸Šä¸‹æ–‡
+		InvalidateRect(hWnd, nullptr, TRUE);					///< è§¦å‘é‡ç»˜
 	}
 
 
 
 	/**
-	 * @brief													: ´Ó×ÊÔ´¼ÓÔØ²¢»æÖÆÍ¼Ïñ
+	 * @brief													: ä»èµ„æºåŠ è½½å¹¶ç»˜åˆ¶å›¾åƒ
 	 * 
-	 * @param[in]		resourceID								: ×ÊÔ´ID
+	 * @param[in]		resourceID								: èµ„æºID
 	 * 
 	 * @throw			std::runtime_error
-	 *					1)	LoadImageA Ê§°Ü						: ×ÊÔ´Î´ÕÒµ½
+	 *					1)	LoadImageA å¤±è´¥						: èµ„æºæœªæ‰¾åˆ°
 	 */
 	void LoadAndDrawImageFromResource(int resourceID) const {
 		AutoUpdate();
-		HBITMAP hBitmap = static_cast<HBITMAP>(LoadImageA(
+		evgdi::win::unique_hbitmap hBitmap(static_cast<HBITMAP>(LoadImageA(
 			hInstance,
 			MAKEINTRESOURCEA(resourceID),
 			IMAGE_BITMAP,
 			0, 0,
 			LR_DEFAULTSIZE | LR_LOADMAP3DCOLORS
-		));
+		)));
 
-		if (hBitmap == NULL) {
+		if (!hBitmap) {
 			throw_runtime_error(
 				"LoadImageA failed: "
 				"Resource not found."
@@ -429,31 +435,30 @@ public:
 			return;
 		}
 
-		DrawImageToBitmap(hBitmap);
-		DeleteObject(hBitmap);
+		DrawImageToBitmap(hBitmap.get());
 	}
 
 
 
 	/**
-	 * @brief													: ´ÓÎÄ¼ş¼ÓÔØ²¢»æÖÆÍ¼Ïñ
+	 * @brief													: ä»æ–‡ä»¶åŠ è½½å¹¶ç»˜åˆ¶å›¾åƒ
 	 * 
-	 * @param[in]		filePath								: ÎÄ¼şÂ·¾¶
+	 * @param[in]		filePath								: æ–‡ä»¶è·¯å¾„
 	 * 
 	 * @throw			std::runtime_error
-	 *					1)	LoadImageA Ê§°Ü						: ÎÄ¼şÎ´ÕÒµ½
+	 *					1)	LoadImageA å¤±è´¥						: æ–‡ä»¶æœªæ‰¾åˆ°
 	 */
 	void LoadAndDrawImageFromFile(const char* filePath) const {
 		AutoUpdate();
-		HBITMAP hBitmap = static_cast<HBITMAP>(LoadImageA(
+		evgdi::win::unique_hbitmap hBitmap(static_cast<HBITMAP>(LoadImageA(
 			NULL,
 			filePath,
 			IMAGE_BITMAP,
 			0, 0,
 			LR_LOADFROMFILE | LR_CREATEDIBSECTION
-		));
+		)));
 
-		if (hBitmap == NULL) {
+		if (!hBitmap) {
 			throw_runtime_error(
 				"LoadImageA failed: "
 				"File not found."
@@ -461,49 +466,48 @@ public:
 			return;
 		}
 
-		DrawImageToBitmap(hBitmap);
-		DeleteObject(hBitmap);
+		DrawImageToBitmap(hBitmap.get());
 	}
 
 
 
 	/**
-	 * @brief													: µ÷ÕûÁÁ¶È
+	 * @brief													: è°ƒæ•´äº®åº¦
 	 * 
-	 * @param[in]		factor									: ÁÁ¶ÈÒò×Ó,´óÓÚ1±äÁÁ,Ğ¡ÓÚ1±ä°µ
+	 * @param[in]		factor									: äº®åº¦å› å­,å¤§äº1å˜äº®,å°äº1å˜æš—
 	 */
 	void AdjustBrightness(float factor) {
 		AutoUpdate();
 
-		RECT clientRect;										///< »ñÈ¡¿Í»§Çø´óĞ¡
+		RECT clientRect;										///< è·å–å®¢æˆ·åŒºå¤§å°
 		GetClientRect(hWnd, &clientRect);
 		int clientWidth = clientRect.right - clientRect.left;
 		int clientHeight = clientRect.bottom - clientRect.top;
 
 		BitBlt(hdcMem, 0, 0, clientWidth, clientHeight,
-			hdcWindow, 0, 0, SRCCOPY);							///< ±¸·İ´°¿ÚÄÚÈİ
+			hdcWindow, 0, 0, SRCCOPY);							///< å¤‡ä»½çª—å£å†…å®¹
 
 		for (int i = 0; i < clientWidth * clientHeight; i++) {
 			HSLQUAD hsl = RGBToHSL(rgbScreen[i]);
 			hsl.l *= factor;
-			hsl.l = (std::max)(0.0f, (std::min)(1.0f, hsl.l));	///< ±£³ÖÁÁ¶ÈÔÚºÏÀí·¶Î§ÄÚ
+			hsl.l = (std::max)(0.0f, (std::min)(1.0f, hsl.l));	///< ä¿æŒäº®åº¦åœ¨åˆç†èŒƒå›´å†…
 			_RGBQUAD rgb = HSLToRGB(hsl);
 			rgbScreen[i].r = rgb.r;
 			rgbScreen[i].g = rgb.g;
 			rgbScreen[i].b = rgb.b;
-		}														///< µ÷ÕûÁÁ¶È
+		}														///< è°ƒæ•´äº®åº¦
 
 		BitBlt(hdcWindow, 0, 0, clientWidth, clientHeight,
-			hdcMem, 0, 0, SRCCOPY);								///< Ó¦ÓÃĞŞ¸Ä
+			hdcMem, 0, 0, SRCCOPY);								///< åº”ç”¨ä¿®æ”¹
 		InvalidateRect(hWnd, nullptr, TRUE);
 	}
 
 
 
 	/**
-	 * @brief													: µ÷Õû¶Ô±È¶È
+	 * @brief													: è°ƒæ•´å¯¹æ¯”åº¦
 	 * 
-	 * @param[in]		factor									: ¶Ô±È¶ÈÒò×Ó,´óÓÚ1ÏÊÑŞ,Ğ¡ÓÚ1°µµ­
+	 * @param[in]		factor									: å¯¹æ¯”åº¦å› å­,å¤§äº1é²œè‰³,å°äº1æš—æ·¡
 	 */
 	void AdjustContrast(float factor) {
 		AutoUpdate();
@@ -532,9 +536,9 @@ public:
 
 
 	/**
-	 * @brief													: µ÷Õû±¥ºÍ¶È
+	 * @brief													: è°ƒæ•´é¥±å’Œåº¦
 	 * 
-	 * @param[in]		factor									: ±¥ºÍ¶ÈÒò×Ó,´óÓÚ1ÏÊÑŞ,Ğ¡ÓÚ1»Ò°µ
+	 * @param[in]		factor									: é¥±å’Œåº¦å› å­,å¤§äº1é²œè‰³,å°äº1ç°æš—
 	 */
 	void AdjustSaturation(float factor) {
 		AutoUpdate();
@@ -564,9 +568,9 @@ public:
 
 
 	/**
-	 * @brief													: ÉèÖÃ´°¿Ú±êÌâ
+	 * @brief													: è®¾ç½®çª—å£æ ‡é¢˜
 	 * 
-	 * @param[in]		title									: ĞÂ±êÌâ
+	 * @param[in]		title									: æ–°æ ‡é¢˜
 	 */
 	void SetWindowTitle(const std::string& title) const{
 		SetWindowTextA(hWnd, title.c_str());
@@ -575,8 +579,8 @@ public:
 
 
 	/**
-	 * @brief													: »ñÈ¡´°¿Ú¿Í»§Çø´óĞ¡
-	 * @return													: ¿Í»§Çø´óĞ¡
+	 * @brief													: è·å–çª—å£å®¢æˆ·åŒºå¤§å°
+	 * @return													: å®¢æˆ·åŒºå¤§å°
 	 */
 	SIZE GetClientSize() const {
 		RECT rect;
@@ -586,19 +590,19 @@ public:
 	}
 
 private:
-	bool hasCollided = false;									///< ±êÖ¾ÊÇ·ñÒÑ¾­·¢ÉúÅö×²
+	bool hasCollided = false;									///< æ ‡å¿—æ˜¯å¦å·²ç»å‘ç”Ÿç¢°æ’
 
 
 
 	/**
-	 * @brief													: ³õÊ¼»¯ GDI ×ÊÔ´
+	 * @brief													: åˆå§‹åŒ– GDI èµ„æº
 	 */
 	void initialization()
 	{
 		hdcWindow = GetDC(hWnd);
 		hdcMem = CreateCompatibleDC(hdcWindow);
 
-		RECT clientRect;										///< »ñÈ¡¿Í»§Çø´óĞ¡
+		RECT clientRect;										///< è·å–å®¢æˆ·åŒºå¤§å°
 		GetClientRect(hWnd, &clientRect);
 		int clientWidth = clientRect.right - clientRect.left;
 		int clientHeight = clientRect.bottom - clientRect.top;
@@ -608,7 +612,7 @@ private:
 		bmi.bmiHeader.biBitCount = 32;
 		bmi.bmiHeader.biPlanes = 1;
 		bmi.bmiHeader.biWidth = clientWidth;
-		bmi.bmiHeader.biHeight = -clientHeight;					///< ¸ºÖµ±íÊ¾´ÓÉÏµ½ÏÂµÄÎ»Í¼
+		bmi.bmiHeader.biHeight = -clientHeight;					///< è´Ÿå€¼è¡¨ç¤ºä»ä¸Šåˆ°ä¸‹çš„ä½å›¾
 		hbmTemp = CreateDIBSection(hdcMem, &bmi, DIB_RGB_COLORS,
 			(void**)&rgbScreen, NULL, 0);
 		if (!hbmTemp)
@@ -620,13 +624,23 @@ private:
 				"out of memory or invalid parameters"
 			);
 		}
-		SelectObject(hdcMem, hbmTemp);
+		oldTempBmp = SelectObject(hdcMem, hbmTemp);
+		if (oldTempBmp == nullptr || oldTempBmp == HGDI_ERROR)
+		{
+			DeleteObject(hbmTemp);
+			hbmTemp = nullptr;
+			DeleteDC(hdcMem);
+			hdcMem = nullptr;
+			ReleaseDC(hWnd, hdcWindow);
+			hdcWindow = nullptr;
+			throw_runtime_error("SelectObject failed: unable to select DIBSection into memory DC.");
+		}
 	}
 
 	
 
 	/**
-	 * @brief													: ×Ô¶¯´¦Àí´°¿ÚÏûÏ¢
+	 * @brief													: è‡ªåŠ¨å¤„ç†çª—å£æ¶ˆæ¯
 	 */
 	void AutoUpdate() const {
 		MSG msg;
@@ -639,13 +653,13 @@ private:
 
 
 	/**
-	 * @brief													: ´°¿Ú¹ı³Ìº¯Êı
-	 * @return													: ÏûÏ¢´¦Àí½á¹û,0±íÊ¾ÏûÏ¢ÒÑ´¦Àí,·Ç0±íÊ¾Î´´¦Àí
+	 * @brief													: çª—å£è¿‡ç¨‹å‡½æ•°
+	 * @return													: æ¶ˆæ¯å¤„ç†ç»“æœ,0è¡¨ç¤ºæ¶ˆæ¯å·²å¤„ç†,é0è¡¨ç¤ºæœªå¤„ç†
 	 * 
-	 * @param[in]		hWnd									: ´°¿Ú¾ä±ú
-	 * @param[in]		msg										: ÏûÏ¢´úÂë
-	 * @param[in]		wParam									: ¸½¼ÓÏûÏ¢²ÎÊı
-	 * @param[in]		lParam									: ¸½¼ÓÏûÏ¢²ÎÊı
+	 * @param[in]		hWnd									: çª—å£å¥æŸ„
+	 * @param[in]		msg										: æ¶ˆæ¯ä»£ç 
+	 * @param[in]		wParam									: é™„åŠ æ¶ˆæ¯å‚æ•°
+	 * @param[in]		lParam									: é™„åŠ æ¶ˆæ¯å‚æ•°
 	 */
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		BorderedWindowGDI* window = reinterpret_cast<BorderedWindowGDI*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
@@ -662,30 +676,35 @@ private:
 
 			if (window) {
 				RECT clientRect;
-				GetClientRect(hWnd, &clientRect);				///< »ñÈ¡¿Í»§Çø´óĞ¡
+				GetClientRect(hWnd, &clientRect);				///< è·å–å®¢æˆ·åŒºå¤§å°
 
 				BitBlt(hdc, 0, 0,
 					clientRect.right, clientRect.bottom,
-					window->hdcMem, 0, 0, SRCCOPY);				///< »æÖÆÄÚ´æDCµ½´°¿Ú
+					window->hdcMem, 0, 0, SRCCOPY);				///< ç»˜åˆ¶å†…å­˜DCåˆ°çª—å£
 			}
 
 			EndPaint(hWnd, &ps);
 			break;
 		}
 		case WM_ERASEBKGND:
-			return 1;											///< ·ÀÖ¹ÉÁË¸
+			return 1;											///< é˜²æ­¢é—ªçƒ
 
 		case WM_SIZE: {
 			if (window) {
-				RECT clientRect;								///< »ñÈ¡¿Í»§Çø´óĞ¡
+				RECT clientRect;								///< è·å–å®¢æˆ·åŒºå¤§å°
 				GetClientRect(hWnd, &clientRect);
 				int clientWidth = clientRect.right - clientRect.left;
 				int clientHeight = clientRect.bottom - clientRect.top;
 
-				if (window->hbmTemp)
-					DeleteObject(window->hbmTemp);
-				if (window->hdcMem)
-					DeleteDC(window->hdcMem);					///< ÊÍ·Å¾ÉµÄDCºÍÎ»Í¼
+				// é‡Šæ”¾æ—§çš„ DC/ä½å›¾å‰ï¼Œå…ˆè¿˜åŸæ—§å¯¹è±¡
+				if (window->hdcMem && window->oldTempBmp && window->oldTempBmp != HGDI_ERROR) {
+					SelectObject(window->hdcMem, window->oldTempBmp);
+				}
+				if (window->hbmTemp) DeleteObject(window->hbmTemp);
+				if (window->hdcMem) DeleteDC(window->hdcMem);
+				window->hbmTemp = nullptr;
+				window->hdcMem = nullptr;
+				window->oldTempBmp = nullptr;
 
 				window->hdcMem = CreateCompatibleDC(window->hdcWindow);
 				BITMAPINFO bmi = { 0 };
@@ -696,7 +715,7 @@ private:
 				bmi.bmiHeader.biHeight = -clientHeight;
 				window->hbmTemp = CreateDIBSection(window->hdcMem,
 					&bmi, DIB_RGB_COLORS,
-					(void**)&window->rgbScreen, NULL, 0);		///< ´´½¨ĞÂµÄDCºÍÎ»Í¼
+					(void**)&window->rgbScreen, NULL, 0);		///< åˆ›å»ºæ–°çš„DCå’Œä½å›¾
 				if (!window->hbmTemp)
 				{
 					DeleteDC(window->hdcMem);
@@ -706,11 +725,19 @@ private:
 						"out of memory or invalid parameters"
 					);
 				}
-				SelectObject(window->hdcMem, window->hbmTemp);
+				window->oldTempBmp = SelectObject(window->hdcMem, window->hbmTemp);
+				if (window->oldTempBmp == nullptr || window->oldTempBmp == HGDI_ERROR)
+				{
+					DeleteObject(window->hbmTemp);
+					window->hbmTemp = nullptr;
+					DeleteDC(window->hdcMem);
+					window->hdcMem = nullptr;
+					throw_runtime_error("SelectObject failed: unable to select resized DIBSection into memory DC.");
+				}
 
 				RECT rect = { 0, 0, clientWidth, clientHeight };
 				HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255));
-				FillRect(window->hdcMem, &rect, hBrush);		///< ÓÃ°×É«Ìî³äĞÂÎ»Í¼
+				FillRect(window->hdcMem, &rect, hBrush);		///< ç”¨ç™½è‰²å¡«å……æ–°ä½å›¾
 				DeleteObject(hBrush);
 
 				InvalidateRect(hWnd, nullptr, TRUE);
@@ -718,13 +745,14 @@ private:
 			break;
 		}
 		case WM_ACTIVATE:
-			if (LOWORD(wParam) == WA_INACTIVE) {}				///< ´°¿ÚÊ§È¥½¹µãÊ±²»×÷´¦Àí
+			if (LOWORD(wParam) == WA_INACTIVE) {}				///< çª—å£å¤±å»ç„¦ç‚¹æ—¶ä¸ä½œå¤„ç†
 			break;
 		case WM_CLOSE:
 			DestroyWindow(hWnd);
 			break;
 		case WM_DESTROY:
-			PostQuitMessage(0);
+			// è¯´æ˜ï¼šä½œä¸ºâ€œåº“é‡Œçš„çª—å£ç»„ä»¶â€ï¼Œè¿™é‡Œä¸è¦ PostQuitMessageã€‚
+			// å¦åˆ™å½“ç”¨æˆ·å…³é—­è¿™ä¸ªçª—å£æ—¶ï¼Œä¼šæŠŠæ•´ä¸ªçº¿ç¨‹çš„æ¶ˆæ¯å¾ªç¯ç›´æ¥é€€å‡ºï¼Œå½±å“åˆ«çš„çª—å£/åŠŸèƒ½ã€‚
 			break;
 		default:
 			return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -733,3 +761,4 @@ private:
 	}
 };
 #endif															///< !BORDER_WINDOW_GDI_HPP
+

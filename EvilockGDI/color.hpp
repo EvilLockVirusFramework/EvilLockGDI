@@ -1,6 +1,6 @@
-/*****************************************************************//**
+ï»¿/*****************************************************************//**
  * @file				color.hpp
- * @brief				ÑÕÉ«Ä£ÐÍ¶¨ÒåÓëµ÷ÓÃ
+ * @brief				é¢œè‰²æ¨¡åž‹å®šä¹‰ä¸Žè°ƒç”¨
  * 
  * @author				EvilLockVirusFramework
  * @date				2024-01-06
@@ -19,16 +19,16 @@
 
 
 /**
- * @brief														: RGB ÑÕÉ«Ä£ÐÍ
+ * @brief														: RGB é¢œè‰²æ¨¡åž‹
  */
 struct _RGBQUAD {
 	union {
-		COLORREF rgb;											///< RGB ÑÕÉ«
+		COLORREF rgb;											///< RGB é¢œè‰²
 		struct {
-			BYTE b;												///< Blue Öµ
-			BYTE g;												///< Green Öµ
-			BYTE r;												///< Red Öµ
-			BYTE unused;										///< ±£Áô
+			BYTE b;												///< Blue å€¼
+			BYTE g;												///< Green å€¼
+			BYTE r;												///< Red å€¼
+			BYTE unused;										///< ä¿ç•™
 		};
 	};
 };
@@ -37,34 +37,34 @@ using PRGBQUAD = _RGBQUAD*;
 
 
 /**
- * @brief														: HSL ÑÕÉ«Ä£ÐÍ
+ * @brief														: HSL é¢œè‰²æ¨¡åž‹
  */
 struct HSLQUAD{
-	float h;													///< É«Ïà
-	float s;													///< ±¥ºÍ¶È
-	float l;													///< ÁÁ¶È
+	float h;													///< è‰²ç›¸
+	float s;													///< é¥±å’Œåº¦
+	float l;													///< äº®åº¦
 };
 
 
 
 /**
- * @brief														: HSV ÑÕÉ«Ä£ÐÍ
+ * @brief														: HSV é¢œè‰²æ¨¡åž‹
  */
 struct HSVQUAD{
-	float h;													///< É«Ïà
-	float s;													///< ±¥ºÍ¶È
-	float v;													///< Ã÷¶È
+	float h;													///< è‰²ç›¸
+	float s;													///< é¥±å’Œåº¦
+	float v;													///< æ˜Žåº¦
 };
 
 
 
 /**
- * @brief														: RGB ÑÕÉ«Ä£ÐÍ×ª HSL ÑÕÉ«Ä£ÐÍ
- * @return														: Ä¿±ê HSL
+ * @brief														: RGB é¢œè‰²æ¨¡åž‹è½¬ HSL é¢œè‰²æ¨¡åž‹
+ * @return														: ç›®æ ‡ HSL
  * 
- * @param[in]			rgb										: Ô´ RGB
+ * @param[in]			rgb										: æº RGB
  */
-HSLQUAD RGBToHSL(_RGBQUAD rgb)
+[[nodiscard]] inline HSLQUAD RGBToHSL(_RGBQUAD rgb)
 {
 	const FLOAT r = rgb.r / 255.0f;
 	const FLOAT g = rgb.g / 255.0f;
@@ -102,12 +102,12 @@ HSLQUAD RGBToHSL(_RGBQUAD rgb)
 
 
 /**
- * @brief														: HSL ÑÕÉ«Ä£ÐÍ×ª RGB ÑÕÉ«Ä£ÐÍ
- * @return														: Ä¿±ê RGB
+ * @brief														: HSL é¢œè‰²æ¨¡åž‹è½¬ RGB é¢œè‰²æ¨¡åž‹
+ * @return														: ç›®æ ‡ RGB
  *
- * @param[in]			hsl										: Ô´ HSL
+ * @param[in]			hsl										: æº HSL
  */
-_RGBQUAD HSLToRGB(HSLQUAD hsl)
+[[nodiscard]] inline _RGBQUAD HSLToRGB(HSLQUAD hsl)
 {
 	const FLOAT h = hsl.h;
 	const FLOAT s = hsl.s;
@@ -153,12 +153,12 @@ _RGBQUAD HSLToRGB(HSLQUAD hsl)
 
 
 /**
- * @brief														: RGB ÑÕÉ«Ä£ÐÍ×ª HSV ÑÕÉ«Ä£ÐÍ
- * @return														: Ä¿±ê HSV
+ * @brief														: RGB é¢œè‰²æ¨¡åž‹è½¬ HSV é¢œè‰²æ¨¡åž‹
+ * @return														: ç›®æ ‡ HSV
  *
- * @param[in]			rgb										: Ô´ RGB
+ * @param[in]			rgb										: æº RGB
  */
-HSVQUAD RGBToHSV(_RGBQUAD rgb) {
+[[nodiscard]] inline HSVQUAD RGBToHSV(_RGBQUAD rgb) {
 	const FLOAT r = rgb.r / 255.f;
 	const FLOAT g = rgb.g / 255.f;
 	const FLOAT b = rgb.b / 255.f;
@@ -184,12 +184,12 @@ HSVQUAD RGBToHSV(_RGBQUAD rgb) {
 
 
 /**
- * @brief														: HSV ÑÕÉ«Ä£ÐÍ×ª RGB ÑÕÉ«Ä£ÐÍ
- * @return														: Ä¿±ê RGB
+ * @brief														: HSV é¢œè‰²æ¨¡åž‹è½¬ RGB é¢œè‰²æ¨¡åž‹
+ * @return														: ç›®æ ‡ RGB
  *
- * @param[in]			hsv										: Ô´ HSV
+ * @param[in]			hsv										: æº HSV
  */
-_RGBQUAD HSVToRGB(HSVQUAD hsv) {
+[[nodiscard]] inline _RGBQUAD HSVToRGB(HSVQUAD hsv) {
 	FLOAT r = 0.0f, g = 0.0f, b = 0.0f;
 	FLOAT h = hsv.h, s = hsv.s, v = hsv.v;
 	FLOAT _h = h * 360.f;
@@ -227,3 +227,4 @@ _RGBQUAD HSVToRGB(HSVQUAD hsv) {
 
 
 #endif															// !COLOR_HPP
+

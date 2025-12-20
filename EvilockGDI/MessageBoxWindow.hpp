@@ -1,6 +1,6 @@
-/*****************************************************************//**
+ï»¿/*****************************************************************//**
  * @file				MessageBoxWindow.hpp
- * @brief				ÏûÏ¢¿ò´°¿Ú²Ù×÷
+ * @brief				æ¶ˆæ¯æ¡†çª—å£æ“ä½œ
  * 
  * @author				EvilLockVirusFramework
  * @date				2025-10-6
@@ -19,36 +19,36 @@
 
 
 /**
- * @brief														: ÏûÏ¢¿ò´°¿Ú·â×°Àà
- * @details														: ·â×°¶ÔÏûÏ¢¿ò´°¿ÚµÄ²Ù×÷,°üÀ¨Î»ÖÃ¡¢´óĞ¡¡¢ÒÆ¶¯µÈ
+ * @brief														: æ¶ˆæ¯æ¡†çª—å£å°è£…ç±»
+ * @details														: å°è£…å¯¹æ¶ˆæ¯æ¡†çª—å£çš„æ“ä½œ,åŒ…æ‹¬ä½ç½®ã€å¤§å°ã€ç§»åŠ¨ç­‰
  */
 class MessageBoxWindow {
 private:
-	HWND hWnd;													///< ´°¿Ú¾ä±ú
-	int xPos;													///< X ×ø±ê
-	int yPos;													///< Y ×ø±ê
-	int windowWidth;											///< ´°¿Ú¿í
-	int windowHeight;											///< ´°¿Ú¸ß
-	bool hasCollided;											///< ÊÇ·ñÅöµ½±ßÔµ
-	bool isAlive;												///< ´°¿ÚÊÇ·ñ»¹´æÔÚ
+	HWND hWnd;													///< çª—å£å¥æŸ„
+	int xPos;													///< X åæ ‡
+	int yPos;													///< Y åæ ‡
+	int windowWidth;											///< çª—å£å®½
+	int windowHeight;											///< çª—å£é«˜
+	bool hasCollided;											///< æ˜¯å¦ç¢°åˆ°è¾¹ç¼˜
+	bool isAlive;												///< çª—å£æ˜¯å¦è¿˜å­˜åœ¨
 
-	std::thread moveThread;										///< ×Ô¶¯ÒÆ¶¯Ïß³Ì
-	std::atomic<bool> stopMoving;								///< Í£Ö¹ÒÆ¶¯±êÖ¾
-	int moveStepX;												///< X·½ÏòÒÆ¶¯²½³¤
-	int moveStepY;												///< Y·½ÏòÒÆ¶¯²½³¤
-	int moveMode;												///< ÒÆ¶¯Ä£Ê½,°üÀ¨BOUNCE(·´µ¯)ºÍSTOP(Í£Ö¹)
-	int moveInterval;											///< ÒÆ¶¯¼ä¸ô,µ¥Î»ºÁÃë
+	std::thread moveThread;										///< è‡ªåŠ¨ç§»åŠ¨çº¿ç¨‹
+	std::atomic<bool> stopMoving;								///< åœæ­¢ç§»åŠ¨æ ‡å¿—
+	int moveStepX;												///< Xæ–¹å‘ç§»åŠ¨æ­¥é•¿
+	int moveStepY;												///< Yæ–¹å‘ç§»åŠ¨æ­¥é•¿
+	int moveMode;												///< ç§»åŠ¨æ¨¡å¼,åŒ…æ‹¬BOUNCE(åå¼¹)å’ŒSTOP(åœæ­¢)
+	int moveInterval;											///< ç§»åŠ¨é—´éš”,å•ä½æ¯«ç§’
 
 
 
 	/**
-	 * @brief													: ×Ô¶¯¸üĞÂ´°¿ÚÎ»ÖÃºÍ´óĞ¡ĞÅÏ¢
+	 * @brief													: è‡ªåŠ¨æ›´æ–°çª—å£ä½ç½®å’Œå¤§å°ä¿¡æ¯
 	 */
 	void AutoUpdate() {
 		if (!hWnd || !IsWindow(hWnd)) {
 			isAlive = false;
 			return;
-		}														///< ´°¿Ú²»´æÔÚÔò±ê¼ÇÎª²»´æ»î
+		}														///< çª—å£ä¸å­˜åœ¨åˆ™æ ‡è®°ä¸ºä¸å­˜æ´»
 
 		RECT rect;
 		if (GetWindowRect(hWnd, &rect)) {
@@ -62,8 +62,8 @@ private:
 
 
 	/**
-	 * @brief													: ×Ô¶¯ÒÆ¶¯Ïß³Ìº¯Êı
-	 * @details													: µ±stopMovingÎªfalseÇÒ´°¿Ú´æ»îÊ±,³ÖĞøÒÆ¶¯´°¿Ú
+	 * @brief													: è‡ªåŠ¨ç§»åŠ¨çº¿ç¨‹å‡½æ•°
+	 * @details													: å½“stopMovingä¸ºfalseä¸”çª—å£å­˜æ´»æ—¶,æŒç»­ç§»åŠ¨çª—å£
 	 */
 	void AutoMoveThread() {
 		while (!stopMoving && IsAlive()) {
@@ -76,13 +76,13 @@ private:
 	
 
 	/**
-	 * @brief													: ´ø×Ô¶¯ÑÓ³ÙµÄÒÆ¶¯º¯Êı
-	 * @details													: ´¦Àí±ßÔµÅö×²Âß¼­,²¢ÔÚÒÆ¶¯ºó×Ô¶¯ÑÓ³Ù
+	 * @brief													: å¸¦è‡ªåŠ¨å»¶è¿Ÿçš„ç§»åŠ¨å‡½æ•°
+	 * @details													: å¤„ç†è¾¹ç¼˜ç¢°æ’é€»è¾‘,å¹¶åœ¨ç§»åŠ¨åè‡ªåŠ¨å»¶è¿Ÿ
 	 * 
-	 * @param[in]		deltaX									: X·½ÏòÒÆ¶¯¾àÀë
-	 * @param[in]		deltaY									: Y·½ÏòÒÆ¶¯¾àÀë
-	 * @param[in]		mode									: ÒÆ¶¯Ä£Ê½,°üÀ¨BOUNCE(·´µ¯)ºÍSTOP(Í£Ö¹)
-	 * @param[in]		delayMs									: ÑÓ³ÙÊ±¼ä,µ¥Î»ºÁÃë,0±íÊ¾ÎŞÑÓ³Ù
+	 * @param[in]		deltaX									: Xæ–¹å‘ç§»åŠ¨è·ç¦»
+	 * @param[in]		deltaY									: Yæ–¹å‘ç§»åŠ¨è·ç¦»
+	 * @param[in]		mode									: ç§»åŠ¨æ¨¡å¼,åŒ…æ‹¬BOUNCE(åå¼¹)å’ŒSTOP(åœæ­¢)
+	 * @param[in]		delayMs									: å»¶è¿Ÿæ—¶é—´,å•ä½æ¯«ç§’,0è¡¨ç¤ºæ— å»¶è¿Ÿ
 	 */
 	void MoveWithDelay(int deltaX, int deltaY, int mode, int delayMs) {
 		if (!IsAlive()) return;
@@ -113,16 +113,16 @@ private:
 
 		if (delayMs > 0) {
 			std::this_thread::sleep_for(
-				std::chrono::milliseconds(delayMs));			///< ×Ô¶¯ÑÓ³Ù
+				std::chrono::milliseconds(delayMs));			///< è‡ªåŠ¨å»¶è¿Ÿ
 		}
 	}
 
 public:
 	/**
-	 * @brief													: ¹¹Ôìº¯Êı
-	 * @details													: ³õÊ¼»¯³ÉÔ±±äÁ¿,²¢¸ù¾İ´°¿Ú¾ä±ú×Ô¶¯¸üĞÂÎ»ÖÃºÍ´óĞ¡
+	 * @brief													: æ„é€ å‡½æ•°
+	 * @details													: åˆå§‹åŒ–æˆå‘˜å˜é‡,å¹¶æ ¹æ®çª—å£å¥æŸ„è‡ªåŠ¨æ›´æ–°ä½ç½®å’Œå¤§å°
 	 * 
-	 * @param[in]		window									: ´°¿Ú¾ä±ú,Ä¬ÈÏÎªnullptr
+	 * @param[in]		window									: çª—å£å¥æŸ„,é»˜è®¤ä¸ºnullptr
 	 */
 	MessageBoxWindow(HWND window = nullptr) : hWnd(window), xPos(0), yPos(0),
 		windowWidth(0), windowHeight(0),
@@ -136,8 +136,8 @@ public:
 
 
 	/**
-	 * @brief													: Îö¹¹º¯Êı
-	 * @details													: È·±£×Ô¶¯ÒÆ¶¯Ïß³Ì±»ÕıÈ·Í£Ö¹
+	 * @brief													: ææ„å‡½æ•°
+	 * @details													: ç¡®ä¿è‡ªåŠ¨ç§»åŠ¨çº¿ç¨‹è¢«æ­£ç¡®åœæ­¢
 	 */
 	~MessageBoxWindow() {
 		StopAutoMove();
@@ -146,9 +146,9 @@ public:
 
 
 	/**
-	 * @brief													: ÉèÖÃ´°¿Ú¾ä±ú²¢¸üĞÂÎ»ÖÃºÍ´óĞ¡ĞÅÏ¢
+	 * @brief													: è®¾ç½®çª—å£å¥æŸ„å¹¶æ›´æ–°ä½ç½®å’Œå¤§å°ä¿¡æ¯
 	 * 
-	 * @param[in]		window									: ´°¿Ú¾ä±ú
+	 * @param[in]		window									: çª—å£å¥æŸ„
 	 */
 	void SetWindow(HWND window) {
 		hWnd = window;
@@ -159,8 +159,8 @@ public:
 
 
 	/**
-	 * @brief													: »ñÈ¡´°¿Ú¾ä±ú
-	 * @return													: ´°¿Ú¾ä±ú
+	 * @brief													: è·å–çª—å£å¥æŸ„
+	 * @return													: çª—å£å¥æŸ„
 	 */
 	HWND GetHandle() const {
 		return hWnd;
@@ -169,8 +169,8 @@ public:
 
 
 	/**
-	 * @brief													: ¼ì²é´°¿ÚÊÇ·ñ»¹´æ»î
-	 * @return													: ´°¿Ú´æ»î×´Ì¬
+	 * @brief													: æ£€æŸ¥çª—å£æ˜¯å¦è¿˜å­˜æ´»
+	 * @return													: çª—å£å­˜æ´»çŠ¶æ€
 	 */
 	bool IsAlive() const {
 		if (!hWnd || !IsWindow(hWnd)) {
@@ -182,7 +182,7 @@ public:
 
 
 	/**
-	 * @brief													: ¹Ø±Õ´°¿Ú
+	 * @brief													: å…³é—­çª—å£
 	 */
 	void Close() {
 		StopAutoMove();
@@ -194,17 +194,17 @@ public:
 
 
 
-	/* ============== ÆÕÍ¨ÒÆ¶¯·½·¨£¨´ø×Ô¶¯ÑÓ³Ù£© ============== */
+	/* ============== æ™®é€šç§»åŠ¨æ–¹æ³•ï¼ˆå¸¦è‡ªåŠ¨å»¶è¿Ÿï¼‰ ============== */
 
 
 
 	/**
-	 * @brief													: ¼ì²éÒÆ¶¯ºóÊÇ·ñ»áÅöµ½±ßÔµ
-	 * @return													: 0=Î´Åöµ½±ßÔµ, 1=Åöµ½±ßÔµ²¢·´µ¯, 2=Åöµ½±ßÔµ²¢Í£Ö¹
+	 * @brief													: æ£€æŸ¥ç§»åŠ¨åæ˜¯å¦ä¼šç¢°åˆ°è¾¹ç¼˜
+	 * @return													: 0=æœªç¢°åˆ°è¾¹ç¼˜, 1=ç¢°åˆ°è¾¹ç¼˜å¹¶åå¼¹, 2=ç¢°åˆ°è¾¹ç¼˜å¹¶åœæ­¢
 	 * 
-	 * @param[in]		deltaX									: X·½ÏòÒÆ¶¯¾àÀë
-	 * @param[in]		deltaY									: Y·½ÏòÒÆ¶¯¾àÀë
-	 * @param[in]		mode									: ÒÆ¶¯Ä£Ê½,°üÀ¨BOUNCE(·´µ¯)ºÍSTOP(Í£Ö¹)
+	 * @param[in]		deltaX									: Xæ–¹å‘ç§»åŠ¨è·ç¦»
+	 * @param[in]		deltaY									: Yæ–¹å‘ç§»åŠ¨è·ç¦»
+	 * @param[in]		mode									: ç§»åŠ¨æ¨¡å¼,åŒ…æ‹¬BOUNCE(åå¼¹)å’ŒSTOP(åœæ­¢)
 	 */
 	int IsAtEdge(int deltaX, int deltaY, int mode) const {
 		if (!IsAlive()) return 0;
@@ -225,13 +225,13 @@ public:
 
 
 	/**
-	 * @brief													: ÒÆ¶¯´°¿Ú£¨´ø×Ô¶¯ÑÓ³Ù£©
-	 * @details													: ´¦Àí±ßÔµÅö×²Âß¼­,²¢ÔÚÒÆ¶¯ºó×Ô¶¯ÑÓ³Ù
+	 * @brief													: ç§»åŠ¨çª—å£ï¼ˆå¸¦è‡ªåŠ¨å»¶è¿Ÿï¼‰
+	 * @details													: å¤„ç†è¾¹ç¼˜ç¢°æ’é€»è¾‘,å¹¶åœ¨ç§»åŠ¨åè‡ªåŠ¨å»¶è¿Ÿ
 	 * 
-	 * @param[in]		deltaX									: X·½ÏòÒÆ¶¯¾àÀë
-	 * @param[in]		deltaY									: Y·½ÏòÒÆ¶¯¾àÀë
-	 * @param[in]		mode									: ÒÆ¶¯Ä£Ê½,°üÀ¨BOUNCE(·´µ¯)ºÍSTOP(Í£Ö¹)
-	 * @param[in]		delayMs									: ÑÓ³ÙÊ±¼ä,µ¥Î»ºÁÃë,0±íÊ¾ÎŞÑÓ³Ù,Ä¬ÈÏ100ºÁÃë
+	 * @param[in]		deltaX									: Xæ–¹å‘ç§»åŠ¨è·ç¦»
+	 * @param[in]		deltaY									: Yæ–¹å‘ç§»åŠ¨è·ç¦»
+	 * @param[in]		mode									: ç§»åŠ¨æ¨¡å¼,åŒ…æ‹¬BOUNCE(åå¼¹)å’ŒSTOP(åœæ­¢)
+	 * @param[in]		delayMs									: å»¶è¿Ÿæ—¶é—´,å•ä½æ¯«ç§’,0è¡¨ç¤ºæ— å»¶è¿Ÿ,é»˜è®¤100æ¯«ç§’
 	 */
 	void Move(int deltaX, int deltaY, int mode, int delayMs = 100) {
 		MoveWithDelay(deltaX, deltaY, mode, delayMs);
@@ -240,12 +240,12 @@ public:
 	
 
 	/**
-	 * @brief													: ÏòÉÏÒÆ¶¯£¨´ø×Ô¶¯ÑÓ³Ù£©
-	 * @details													: ´¦Àí±ßÔµÅö×²Âß¼­,²¢ÔÚÒÆ¶¯ºó×Ô¶¯ÑÓ³Ù
+	 * @brief													: å‘ä¸Šç§»åŠ¨ï¼ˆå¸¦è‡ªåŠ¨å»¶è¿Ÿï¼‰
+	 * @details													: å¤„ç†è¾¹ç¼˜ç¢°æ’é€»è¾‘,å¹¶åœ¨ç§»åŠ¨åè‡ªåŠ¨å»¶è¿Ÿ
 	 * 
-	 * @param[in]		dt										: ÒÆ¶¯¾àÀë
-	 * @param[in]		mode									: ÒÆ¶¯Ä£Ê½,°üÀ¨BOUNCE(·´µ¯)ºÍSTOP(Í£Ö¹)
-	 * @param[in]		delayMs									: ÑÓ³ÙÊ±¼ä,µ¥Î»ºÁÃë,0±íÊ¾ÎŞÑÓ³Ù,Ä¬ÈÏ100ºÁÃë
+	 * @param[in]		dt										: ç§»åŠ¨è·ç¦»
+	 * @param[in]		mode									: ç§»åŠ¨æ¨¡å¼,åŒ…æ‹¬BOUNCE(åå¼¹)å’ŒSTOP(åœæ­¢)
+	 * @param[in]		delayMs									: å»¶è¿Ÿæ—¶é—´,å•ä½æ¯«ç§’,0è¡¨ç¤ºæ— å»¶è¿Ÿ,é»˜è®¤100æ¯«ç§’
 	 */
 	void MoveUp(int dt, int mode, int delayMs = 100) {
 		MoveWithDelay(0, -dt, mode, delayMs);
@@ -254,12 +254,12 @@ public:
 
 
 	/**
-	 * @brief													: ÏòÏÂÒÆ¶¯£¨´ø×Ô¶¯ÑÓ³Ù£©
-	 * @details													: ´¦Àí±ßÔµÅö×²Âß¼­,²¢ÔÚÒÆ¶¯ºó×Ô¶¯ÑÓ³Ù
+	 * @brief													: å‘ä¸‹ç§»åŠ¨ï¼ˆå¸¦è‡ªåŠ¨å»¶è¿Ÿï¼‰
+	 * @details													: å¤„ç†è¾¹ç¼˜ç¢°æ’é€»è¾‘,å¹¶åœ¨ç§»åŠ¨åè‡ªåŠ¨å»¶è¿Ÿ
 	 *
-	 * @param[in]		dt										: ÒÆ¶¯¾àÀë
-	 * @param[in]		mode									: ÒÆ¶¯Ä£Ê½,°üÀ¨BOUNCE(·´µ¯)ºÍSTOP(Í£Ö¹)
-	 * @param[in]		delayMs									: ÑÓ³ÙÊ±¼ä,µ¥Î»ºÁÃë,0±íÊ¾ÎŞÑÓ³Ù,Ä¬ÈÏ100ºÁÃë
+	 * @param[in]		dt										: ç§»åŠ¨è·ç¦»
+	 * @param[in]		mode									: ç§»åŠ¨æ¨¡å¼,åŒ…æ‹¬BOUNCE(åå¼¹)å’ŒSTOP(åœæ­¢)
+	 * @param[in]		delayMs									: å»¶è¿Ÿæ—¶é—´,å•ä½æ¯«ç§’,0è¡¨ç¤ºæ— å»¶è¿Ÿ,é»˜è®¤100æ¯«ç§’
 	 */
 	void MoveDown(int dt, int mode, int delayMs = 100) {
 		MoveWithDelay(0, dt, mode, delayMs);
@@ -268,12 +268,12 @@ public:
 
 
 	/**
-	 * @brief													: Ïò×óÒÆ¶¯£¨´ø×Ô¶¯ÑÓ³Ù£©
-	 * @details													: ´¦Àí±ßÔµÅö×²Âß¼­,²¢ÔÚÒÆ¶¯ºó×Ô¶¯ÑÓ³Ù
+	 * @brief													: å‘å·¦ç§»åŠ¨ï¼ˆå¸¦è‡ªåŠ¨å»¶è¿Ÿï¼‰
+	 * @details													: å¤„ç†è¾¹ç¼˜ç¢°æ’é€»è¾‘,å¹¶åœ¨ç§»åŠ¨åè‡ªåŠ¨å»¶è¿Ÿ
 	 *
-	 * @param[in]		dt										: ÒÆ¶¯¾àÀë
-	 * @param[in]		mode									: ÒÆ¶¯Ä£Ê½,°üÀ¨BOUNCE(·´µ¯)ºÍSTOP(Í£Ö¹)
-	 * @param[in]		delayMs									: ÑÓ³ÙÊ±¼ä,µ¥Î»ºÁÃë,0±íÊ¾ÎŞÑÓ³Ù,Ä¬ÈÏ100ºÁÃë
+	 * @param[in]		dt										: ç§»åŠ¨è·ç¦»
+	 * @param[in]		mode									: ç§»åŠ¨æ¨¡å¼,åŒ…æ‹¬BOUNCE(åå¼¹)å’ŒSTOP(åœæ­¢)
+	 * @param[in]		delayMs									: å»¶è¿Ÿæ—¶é—´,å•ä½æ¯«ç§’,0è¡¨ç¤ºæ— å»¶è¿Ÿ,é»˜è®¤100æ¯«ç§’
 	 */
 	void MoveLeft(int dt, int mode, int delayMs = 100) {
 		MoveWithDelay(-dt, 0, mode, delayMs);
@@ -282,12 +282,12 @@ public:
 
 
 	/**
-	 * @brief													: ÏòÓÒÒÆ¶¯£¨´ø×Ô¶¯ÑÓ³Ù£©
-	 * @details													: ´¦Àí±ßÔµÅö×²Âß¼­,²¢ÔÚÒÆ¶¯ºó×Ô¶¯ÑÓ³Ù
+	 * @brief													: å‘å³ç§»åŠ¨ï¼ˆå¸¦è‡ªåŠ¨å»¶è¿Ÿï¼‰
+	 * @details													: å¤„ç†è¾¹ç¼˜ç¢°æ’é€»è¾‘,å¹¶åœ¨ç§»åŠ¨åè‡ªåŠ¨å»¶è¿Ÿ
 	 *
-	 * @param[in]		dt										: ÒÆ¶¯¾àÀë
-	 * @param[in]		mode									: ÒÆ¶¯Ä£Ê½,°üÀ¨BOUNCE(·´µ¯)ºÍSTOP(Í£Ö¹)
-	 * @param[in]		delayMs									: ÑÓ³ÙÊ±¼ä,µ¥Î»ºÁÃë,0±íÊ¾ÎŞÑÓ³Ù,Ä¬ÈÏ100ºÁÃë
+	 * @param[in]		dt										: ç§»åŠ¨è·ç¦»
+	 * @param[in]		mode									: ç§»åŠ¨æ¨¡å¼,åŒ…æ‹¬BOUNCE(åå¼¹)å’ŒSTOP(åœæ­¢)
+	 * @param[in]		delayMs									: å»¶è¿Ÿæ—¶é—´,å•ä½æ¯«ç§’,0è¡¨ç¤ºæ— å»¶è¿Ÿ,é»˜è®¤100æ¯«ç§’
 	 */
 	void MoveRight(int dt, int mode, int delayMs = 100) {
 		MoveWithDelay(dt, 0, mode, delayMs);
@@ -296,12 +296,12 @@ public:
 
 
 	/**
-	 * @brief													: µ¯»ÉË¥¼õ»Î¶¯Ğ§¹û
-	 * @details													: ´°¿ÚÔÚÔ­Î»ÖÃ¸½½üÀ´»Ø»Î¶¯,»Î¶¯·ù¶ÈÖğ½¥¼õĞ¡Ö±ÖÁÍ£Ö¹
+	 * @brief													: å¼¹ç°§è¡°å‡æ™ƒåŠ¨æ•ˆæœ
+	 * @details													: çª—å£åœ¨åŸä½ç½®é™„è¿‘æ¥å›æ™ƒåŠ¨,æ™ƒåŠ¨å¹…åº¦é€æ¸å‡å°ç›´è‡³åœæ­¢
 	 * 
-	 * @param[in]		shakeCount								: »Î¶¯´ÎÊı,Ä¬ÈÏ8´Î
-	 * @param[in]		maxIntensity							: ×î´ó»Î¶¯Ç¿¶È,µ¥Î»ÏñËØ,Ä¬ÈÏ15ÏñËØ
-	 * @param[in]		delayMs									: Ã¿´Î»Î¶¯ÑÓ³ÙÊ±¼ä,µ¥Î»ºÁÃë,Ä¬ÈÏ30ºÁÃë
+	 * @param[in]		shakeCount								: æ™ƒåŠ¨æ¬¡æ•°,é»˜è®¤8æ¬¡
+	 * @param[in]		maxIntensity							: æœ€å¤§æ™ƒåŠ¨å¼ºåº¦,å•ä½åƒç´ ,é»˜è®¤15åƒç´ 
+	 * @param[in]		delayMs									: æ¯æ¬¡æ™ƒåŠ¨å»¶è¿Ÿæ—¶é—´,å•ä½æ¯«ç§’,é»˜è®¤30æ¯«ç§’
 	 */
 	void Shake(int shakeCount = 8, int maxIntensity = 15, int delayMs = 30) {
 		if (!IsAlive()) return;
@@ -313,7 +313,7 @@ public:
 		for (int i = 0; i < shakeCount; i++) {
 			float decay = static_cast<float>(shakeCount - i) / shakeCount;
 			int currentIntensity = static_cast<int>(
-				maxIntensity * decay);							///< ¼ÆËãË¥¼õµÄÇ¿¶È
+				maxIntensity * decay);							///< è®¡ç®—è¡°å‡çš„å¼ºåº¦
 
 			if (currentIntensity < 1) currentIntensity = 1;
 
@@ -327,7 +327,7 @@ public:
 				originalX - currentIntensity, originalY,
 				0, 0, SWP_NOSIZE | SWP_NOZORDER);
 			std::this_thread::sleep_for(
-				std::chrono::milliseconds(delayMs));			///< ×óÓÒ»Î¶¯
+				std::chrono::milliseconds(delayMs));			///< å·¦å³æ™ƒåŠ¨
 
 			SetWindowPos(hWnd, nullptr,
 				originalX, originalY + currentIntensity,
@@ -339,27 +339,27 @@ public:
 				originalX, originalY - currentIntensity,
 				0, 0, SWP_NOSIZE | SWP_NOZORDER);
 			std::this_thread::sleep_for(
-				std::chrono::milliseconds(delayMs));			///< ÉÏÏÂ»Î¶¯
+				std::chrono::milliseconds(delayMs));			///< ä¸Šä¸‹æ™ƒåŠ¨
 		}
 
 		SetWindowPos(hWnd, nullptr, originalX, originalY,
-			0, 0, SWP_NOSIZE | SWP_NOZORDER);					///< »Ö¸´Ô­Ê¼Î»ÖÃ
+			0, 0, SWP_NOSIZE | SWP_NOZORDER);					///< æ¢å¤åŸå§‹ä½ç½®
 	}
 
 
 
-	/* ==================== ×Ô¶¯ÒÆ¶¯·½·¨ ==================== */
+	/* ==================== è‡ªåŠ¨ç§»åŠ¨æ–¹æ³• ==================== */
 
 
 
 	/**
-	 * @brief													: ¿ªÊ¼×Ô¶¯ÒÆ¶¯
-	 * @details													: ÄÚ²¿Æô¶¯Ò»¸öÏß³Ì³ÖĞøÒÆ¶¯´°¿Ú,Ö±µ½µ÷ÓÃStopAutoMove»ò´°¿ÚÏú»Ù
+	 * @brief													: å¼€å§‹è‡ªåŠ¨ç§»åŠ¨
+	 * @details													: å†…éƒ¨å¯åŠ¨ä¸€ä¸ªçº¿ç¨‹æŒç»­ç§»åŠ¨çª—å£,ç›´åˆ°è°ƒç”¨StopAutoMoveæˆ–çª—å£é”€æ¯
 	 * 
-	 * @param[in]		stepX									: X·½ÏòÒÆ¶¯²½³¤
-	 * @param[in]		stepY									: Y·½ÏòÒÆ¶¯²½³¤
-	 * @param[in]		mode									: ÒÆ¶¯Ä£Ê½,°üÀ¨BOUNCE(·´µ¯)ºÍSTOP(Í£Ö¹),Ä¬ÈÏBOUNCE
-	 * @param[in]		interval								: ÒÆ¶¯¼ä¸ô,µ¥Î»ºÁÃë,Ä¬ÈÏ50ºÁÃë
+	 * @param[in]		stepX									: Xæ–¹å‘ç§»åŠ¨æ­¥é•¿
+	 * @param[in]		stepY									: Yæ–¹å‘ç§»åŠ¨æ­¥é•¿
+	 * @param[in]		mode									: ç§»åŠ¨æ¨¡å¼,åŒ…æ‹¬BOUNCE(åå¼¹)å’ŒSTOP(åœæ­¢),é»˜è®¤BOUNCE
+	 * @param[in]		interval								: ç§»åŠ¨é—´éš”,å•ä½æ¯«ç§’,é»˜è®¤50æ¯«ç§’
 	 */
 	void StartAutoMove(int stepX, int stepY, int mode = BOUNCE, int interval = 50) {
 		StopAutoMove();
@@ -376,13 +376,13 @@ public:
 
 
 	/**
-	 * @brief													: ×Ô¶¯ÏòÖ¸¶¨·½ÏòÒÆ¶¯
-	 * @details													: ÅĞ¶Ï·½Ïò×Ö·û´®²¢µ÷ÓÃStartAutoMove
+	 * @brief													: è‡ªåŠ¨å‘æŒ‡å®šæ–¹å‘ç§»åŠ¨
+	 * @details													: åˆ¤æ–­æ–¹å‘å­—ç¬¦ä¸²å¹¶è°ƒç”¨StartAutoMove
 	 * 
-	 * @param[in]		direction								: ÒÆ¶¯·½Ïò,¿ÉÑ¡"up","down","left","right","random"
-	 * @param[in]		step									: ÒÆ¶¯²½³¤,Ä¬ÈÏ15
-	 * @param[in]		mode									: ÒÆ¶¯Ä£Ê½,°üÀ¨BOUNCE(·´µ¯)ºÍSTOP(Í£Ö¹),Ä¬ÈÏBOUNCE
-	 * @param[in]		interval								: ÒÆ¶¯¼ä¸ô,µ¥Î»ºÁÃë,Ä¬ÈÏ50ºÁÃë
+	 * @param[in]		direction								: ç§»åŠ¨æ–¹å‘,å¯é€‰"up","down","left","right","random"
+	 * @param[in]		step									: ç§»åŠ¨æ­¥é•¿,é»˜è®¤15
+	 * @param[in]		mode									: ç§»åŠ¨æ¨¡å¼,åŒ…æ‹¬BOUNCE(åå¼¹)å’ŒSTOP(åœæ­¢),é»˜è®¤BOUNCE
+	 * @param[in]		interval								: ç§»åŠ¨é—´éš”,å•ä½æ¯«ç§’,é»˜è®¤50æ¯«ç§’
 	 */
 	void StartAutoMoveDirection(const std::string& direction, int step = 15, int mode = BOUNCE, int interval = 50) {
 		if (direction == "up") StartAutoMove(0, -step, mode, interval);
@@ -395,12 +395,12 @@ public:
 	
 
 	/**
-	 * @brief													: ¿ªÊ¼Ëæ»ú×Ô¶¯ÒÆ¶¯
-	 * @details													: ÄÚ²¿Æô¶¯Ò»¸öÏß³Ì³ÖĞøËæ»úÒÆ¶¯´°¿Ú,Ö±µ½µ÷ÓÃStopAutoMove»ò´°¿ÚÏú»Ù
+	 * @brief													: å¼€å§‹éšæœºè‡ªåŠ¨ç§»åŠ¨
+	 * @details													: å†…éƒ¨å¯åŠ¨ä¸€ä¸ªçº¿ç¨‹æŒç»­éšæœºç§»åŠ¨çª—å£,ç›´åˆ°è°ƒç”¨StopAutoMoveæˆ–çª—å£é”€æ¯
 	 * 
-	 * @param[in]		maxStep									: ×î´óËæ»ú²½³¤,·¶Î§[-maxStep, maxStep],Ä¬ÈÏ15
-	 * @param[in]		mode									: ÒÆ¶¯Ä£Ê½,°üÀ¨BOUNCE(·´µ¯)ºÍSTOP(Í£Ö¹),Ä¬ÈÏBOUNCE
-	 * @param[in]		interval								: ÒÆ¶¯¼ä¸ô,µ¥Î»ºÁÃë,Ä¬ÈÏ50ºÁÃë
+	 * @param[in]		maxStep									: æœ€å¤§éšæœºæ­¥é•¿,èŒƒå›´[-maxStep, maxStep],é»˜è®¤15
+	 * @param[in]		mode									: ç§»åŠ¨æ¨¡å¼,åŒ…æ‹¬BOUNCE(åå¼¹)å’ŒSTOP(åœæ­¢),é»˜è®¤BOUNCE
+	 * @param[in]		interval								: ç§»åŠ¨é—´éš”,å•ä½æ¯«ç§’,é»˜è®¤50æ¯«ç§’
 	 */
 	void StartAutoMoveRandom(
 		int maxStep = 15, int mode = BOUNCE, int interval = 50
@@ -419,7 +419,7 @@ public:
 			while (!stopMoving && IsAlive()) {
 				int stepX = dist(gen);
 				int stepY = dist(gen);
-				MoveWithDelay(stepX, stepY, mode, 0);			///< ×Ô¶¯ÒÆ¶¯ÄÚ²¿²»ĞèÒª¶îÍâÑÓ³Ù
+				MoveWithDelay(stepX, stepY, mode, 0);			///< è‡ªåŠ¨ç§»åŠ¨å†…éƒ¨ä¸éœ€è¦é¢å¤–å»¶è¿Ÿ
 				std::this_thread::sleep_for(
 					std::chrono::milliseconds(interval));
 			}
@@ -429,8 +429,8 @@ public:
 
 
 	/**
-	 * @brief													: Í£Ö¹×Ô¶¯ÒÆ¶¯
-	 * @details													: ÉèÖÃÍ£Ö¹±êÖ¾²¢µÈ´ıÏß³Ì½áÊø
+	 * @brief													: åœæ­¢è‡ªåŠ¨ç§»åŠ¨
+	 * @details													: è®¾ç½®åœæ­¢æ ‡å¿—å¹¶ç­‰å¾…çº¿ç¨‹ç»“æŸ
 	 */
 	void StopAutoMove() {
 		stopMoving = true;
@@ -442,11 +442,11 @@ public:
 	
 
 	/**
-	 * @brief													: »ñÈ¡µ±Ç°´°¿ÚÎ»ÖÃ
-	 * @details													: Í¨¹ıÒıÓÃ²ÎÊı·µ»ØXºÍY×ø±ê
+	 * @brief													: è·å–å½“å‰çª—å£ä½ç½®
+	 * @details													: é€šè¿‡å¼•ç”¨å‚æ•°è¿”å›Xå’ŒYåæ ‡
 	 * 
-	 * @param[out]		x										: X×ø±ê
-	 * @param[out]		y										: Y×ø±ê
+	 * @param[out]		x										: Xåæ ‡
+	 * @param[out]		y										: Yåæ ‡
 	 */
 	void GetPosition(int& x, int& y) const {
 		x = xPos, y = yPos;
@@ -455,11 +455,11 @@ public:
 	
 
 	/**
-	 * @brief													: »ñÈ¡µ±Ç°´°¿Ú´óĞ¡
-	 * @details													: Í¨¹ıÒıÓÃ²ÎÊı·µ»Ø¿í¶ÈºÍ¸ß¶È
+	 * @brief													: è·å–å½“å‰çª—å£å¤§å°
+	 * @details													: é€šè¿‡å¼•ç”¨å‚æ•°è¿”å›å®½åº¦å’Œé«˜åº¦
 	 * 
-	 * @param[out]		width									: ´°¿Ú¿í¶È
-	 * @param[out]		height									: ´°¿Ú¸ß¶È
+	 * @param[out]		width									: çª—å£å®½åº¦
+	 * @param[out]		height									: çª—å£é«˜åº¦
 	 */
 	void GetSize(int& width, int& height) const {
 		width = windowWidth, height = windowHeight;
@@ -471,19 +471,19 @@ private:
 	static int MsgBox_X;
 	static int MsgBox_Y;
 
-	static std::vector<MessageBoxWindow*> allMessageBoxes;		///< ´æ´¢ËùÓĞµ¯´°¶ÔÏóµÄÈ«¾ÖÁĞ±í
+	static std::vector<MessageBoxWindow*> allMessageBoxes;		///< å­˜å‚¨æ‰€æœ‰å¼¹çª—å¯¹è±¡çš„å…¨å±€åˆ—è¡¨
 	static std::atomic<int> nextId;
 	static std::mutex boxesMutex;
 	static std::condition_variable newBoxCV;
 
 	/**
-	 * @brief													: CBT¹³×Óº¯Êı,ÓÃÓÚÔÚ´´½¨´°¿ÚÊ±ÉèÖÃÆäÎ»ÖÃ
-	 * @details													: µ±²¶»ñµ½´´½¨´°¿ÚµÄÏûÏ¢Ê±,Èç¹û´°¿ÚÃ»ÓĞ¸¸´°¿Ú,ÔòÉèÖÃÆäÎ»ÖÃÎªÖ¸¶¨µÄMsgBox_XºÍMsgBox_Y
-	 * @return													: µ÷ÓÃÏÂÒ»¸ö¹³×Óº¯ÊıµÄ·µ»ØÖµ
+	 * @brief													: CBTé’©å­å‡½æ•°,ç”¨äºåœ¨åˆ›å»ºçª—å£æ—¶è®¾ç½®å…¶ä½ç½®
+	 * @details													: å½“æ•è·åˆ°åˆ›å»ºçª—å£çš„æ¶ˆæ¯æ—¶,å¦‚æœçª—å£æ²¡æœ‰çˆ¶çª—å£,åˆ™è®¾ç½®å…¶ä½ç½®ä¸ºæŒ‡å®šçš„MsgBox_Xå’ŒMsgBox_Y
+	 * @return													: è°ƒç”¨ä¸‹ä¸€ä¸ªé’©å­å‡½æ•°çš„è¿”å›å€¼
 	 * 
-	 * @param[in]		nCode									: ¹³×Ó´úÂë
-	 * @param[in]		wParam									: ¸½¼ÓÏûÏ¢²ÎÊı,¾ßÌåº¬ÒåÈ¡¾öÓÚnCode
-	 * @param[in]		lParam									: ¸½¼ÓÏûÏ¢²ÎÊı,¾ßÌåº¬ÒåÈ¡¾öÓÚnCode
+	 * @param[in]		nCode									: é’©å­ä»£ç 
+	 * @param[in]		wParam									: é™„åŠ æ¶ˆæ¯å‚æ•°,å…·ä½“å«ä¹‰å–å†³äºnCode
+	 * @param[in]		lParam									: é™„åŠ æ¶ˆæ¯å‚æ•°,å…·ä½“å«ä¹‰å–å†³äºnCode
 	 */
 	static LRESULT CALLBACK CBTProc(
 		int nCode, WPARAM wParam, LPARAM lParam
@@ -500,13 +500,13 @@ private:
 	}
 
 	/**
-	 * @brief													: ÏûÏ¢¿ò¹³×Ó,ÓÃÓÚ²¶»ñÏûÏ¢¿ò´°¿Ú¾ä±ú
-	 * @details													: µ±²¶»ñµ½¼¤»î´°¿ÚµÄÏûÏ¢Ê±,´´½¨Ò»¸öĞÂµÄMessageBoxWindow¶ÔÏó²¢Ìí¼Óµ½È«¾ÖÁĞ±íÖĞ,Í¬Ê±Í¨ÖªµÈ´ıµÄĞÂ´°¿Ú´´½¨
-	 * @return													: µ÷ÓÃÏÂÒ»¸ö¹³×Óº¯ÊıµÄ·µ»ØÖµ
+	 * @brief													: æ¶ˆæ¯æ¡†é’©å­,ç”¨äºæ•è·æ¶ˆæ¯æ¡†çª—å£å¥æŸ„
+	 * @details													: å½“æ•è·åˆ°æ¿€æ´»çª—å£çš„æ¶ˆæ¯æ—¶,åˆ›å»ºä¸€ä¸ªæ–°çš„MessageBoxWindowå¯¹è±¡å¹¶æ·»åŠ åˆ°å…¨å±€åˆ—è¡¨ä¸­,åŒæ—¶é€šçŸ¥ç­‰å¾…çš„æ–°çª—å£åˆ›å»º
+	 * @return													: è°ƒç”¨ä¸‹ä¸€ä¸ªé’©å­å‡½æ•°çš„è¿”å›å€¼
 	 * 
-	 * @param[in]		nCode									: ¹³×Ó´úÂë
-	 * @param[in]		wParam									: ¸½¼ÓÏûÏ¢²ÎÊı,¾ßÌåº¬ÒåÈ¡¾öÓÚnCode
-	 * @param[in]		lParam									: ¸½¼ÓÏûÏ¢²ÎÊı,¾ßÌåº¬ÒåÈ¡¾öÓÚnCode
+	 * @param[in]		nCode									: é’©å­ä»£ç 
+	 * @param[in]		wParam									: é™„åŠ æ¶ˆæ¯å‚æ•°,å…·ä½“å«ä¹‰å–å†³äºnCode
+	 * @param[in]		lParam									: é™„åŠ æ¶ˆæ¯å‚æ•°,å…·ä½“å«ä¹‰å–å†³äºnCode
 	 */
 	static LRESULT CALLBACK GetMsgBoxHook(
 		int nCode, WPARAM wParam, LPARAM lParam
@@ -515,11 +515,11 @@ private:
 			HWND hwnd = (HWND)wParam;
 			
 			MessageBoxWindow* msgBox = new MessageBoxWindow(
-				hwnd);											///< ´´½¨ĞÂµÄMessageBoxWindow¶ÔÏó²¢Ìí¼Óµ½ÁĞ±í
+				hwnd);											///< åˆ›å»ºæ–°çš„MessageBoxWindowå¯¹è±¡å¹¶æ·»åŠ åˆ°åˆ—è¡¨
 
 			std::lock_guard<std::mutex> lock(boxesMutex);
 			allMessageBoxes.push_back(msgBox);
-			newBoxCV.notify_all();								///< Í¨ÖªÓĞĞÂ´°¿Ú´´½¨
+			newBoxCV.notify_all();								///< é€šçŸ¥æœ‰æ–°çª—å£åˆ›å»º
 		}
 		return CallNextHookEx(NULL, nCode, wParam, lParam);
 	}
@@ -527,16 +527,16 @@ private:
 
 
 	/**
-	 * @brief													: ´ø¹³×ÓµÄMessageBoxº¯Êı,ÓÃÓÚÔÚÖ¸¶¨Î»ÖÃÏÔÊ¾ÏûÏ¢¿ò
-	 * @details													: ÉèÖÃCBT¹³×ÓÒÔÀ¹½ØÏûÏ¢¿ò´´½¨,²¢ÔÚ´´½¨Ê±ÉèÖÃÆäÎ»ÖÃÎªÖ¸¶¨µÄXºÍY×ø±ê
-	 * @return													: MessageBoxº¯ÊıµÄ·µ»ØÖµ
+	 * @brief													: å¸¦é’©å­çš„MessageBoxå‡½æ•°,ç”¨äºåœ¨æŒ‡å®šä½ç½®æ˜¾ç¤ºæ¶ˆæ¯æ¡†
+	 * @details													: è®¾ç½®CBTé’©å­ä»¥æ‹¦æˆªæ¶ˆæ¯æ¡†åˆ›å»º,å¹¶åœ¨åˆ›å»ºæ—¶è®¾ç½®å…¶ä½ç½®ä¸ºæŒ‡å®šçš„Xå’ŒYåæ ‡
+	 * @return													: MessageBoxå‡½æ•°çš„è¿”å›å€¼
 	 * 
-	 * @param[in]		hWnd									: ¸¸´°¿Ú¾ä±ú
-	 * @param[in]		lpText									: ÏûÏ¢ÎÄ±¾
-	 * @param[in]		lpCaption								: ±êÌâÎÄ±¾
-	 * @param[in]		uType									: ÏûÏ¢¿òÀàĞÍ
-	 * @param[in]		X										: X×ø±ê
-	 * @param[in]		Y										: Y×ø±ê
+	 * @param[in]		hWnd									: çˆ¶çª—å£å¥æŸ„
+	 * @param[in]		lpText									: æ¶ˆæ¯æ–‡æœ¬
+	 * @param[in]		lpCaption								: æ ‡é¢˜æ–‡æœ¬
+	 * @param[in]		uType									: æ¶ˆæ¯æ¡†ç±»å‹
+	 * @param[in]		X										: Xåæ ‡
+	 * @param[in]		Y										: Yåæ ‡
 	 */
 	static int MessageBoxWithHook(HWND hWnd,
 		LPCWSTR lpText, LPCWSTR lpCaption,
@@ -562,15 +562,15 @@ private:
 
 
 	/**
-	 * @brief													: Ïß³Ìº¯Êı,ÔÚĞÂÏß³ÌÖĞÏÔÊ¾ÏûÏ¢¿ò
-	 * @details													: µ÷ÓÃ´ø¹³×ÓµÄMessageBoxº¯ÊıÒÔÈ·±£ÏûÏ¢¿òÔÚÖ¸¶¨Î»ÖÃÏÔÊ¾
+	 * @brief													: çº¿ç¨‹å‡½æ•°,åœ¨æ–°çº¿ç¨‹ä¸­æ˜¾ç¤ºæ¶ˆæ¯æ¡†
+	 * @details													: è°ƒç”¨å¸¦é’©å­çš„MessageBoxå‡½æ•°ä»¥ç¡®ä¿æ¶ˆæ¯æ¡†åœ¨æŒ‡å®šä½ç½®æ˜¾ç¤º
 	 * 
-	 * @param[in]		hWnd									: ¸¸´°¿Ú¾ä±ú
-	 * @param[in]		text									: ÏûÏ¢ÎÄ±¾
-	 * @param[in]		caption									: ±êÌâÎÄ±¾
-	 * @param[in]		uType									: ÏûÏ¢¿òÀàĞÍ
-	 * @param[in]		x										: X×ø±ê
-	 * @param[in]		y										: Y×ø±ê
+	 * @param[in]		hWnd									: çˆ¶çª—å£å¥æŸ„
+	 * @param[in]		text									: æ¶ˆæ¯æ–‡æœ¬
+	 * @param[in]		caption									: æ ‡é¢˜æ–‡æœ¬
+	 * @param[in]		uType									: æ¶ˆæ¯æ¡†ç±»å‹
+	 * @param[in]		x										: Xåæ ‡
+	 * @param[in]		y										: Yåæ ‡
 	 */
 	static void MessageBoxThread(HWND hWnd,
 		const std::wstring& text, const std::wstring& caption,
@@ -587,55 +587,55 @@ public:
 
 
 	/**
-	 * @brief													: ÔÚÖ¸¶¨Î»ÖÃÏÔÊ¾ÏûÏ¢¿ò²¢·µ»Ø¶ÔÏó(·Ç×èÈû°æ±¾)
-	 * @details													: ÄÚ²¿Æô¶¯Ò»¸öĞÂÏß³ÌÏÔÊ¾ÏûÏ¢¿ò,²¢µÈ´ıÆä´´½¨Íê³Éºó·µ»Ø¶ÔÓ¦µÄMessageBoxWindow¶ÔÏó
-	 * @return													: ĞÂ´´½¨µÄMessageBoxWindow¶ÔÏóÖ¸Õë,Èô³¬Ê±Ôò·µ»Ønullptr
+	 * @brief													: åœ¨æŒ‡å®šä½ç½®æ˜¾ç¤ºæ¶ˆæ¯æ¡†å¹¶è¿”å›å¯¹è±¡(éé˜»å¡ç‰ˆæœ¬)
+	 * @details													: å†…éƒ¨å¯åŠ¨ä¸€ä¸ªæ–°çº¿ç¨‹æ˜¾ç¤ºæ¶ˆæ¯æ¡†,å¹¶ç­‰å¾…å…¶åˆ›å»ºå®Œæˆåè¿”å›å¯¹åº”çš„MessageBoxWindowå¯¹è±¡
+	 * @return													: æ–°åˆ›å»ºçš„MessageBoxWindowå¯¹è±¡æŒ‡é’ˆ,è‹¥è¶…æ—¶åˆ™è¿”å›nullptr
 	 * 
-	 * @param[in]		hWnd									: ¸¸´°¿Ú¾ä±ú
-	 * @param[in]		text									: ÏûÏ¢ÎÄ±¾
-	 * @param[in]		caption									: ±êÌâÎÄ±¾
-	 * @param[in]		uType									: ÏûÏ¢¿òÀàĞÍ
-	 * @param[in]		x										: X×ø±ê
-	 * @param[in]		y										: Y×ø±ê
+	 * @param[in]		hWnd									: çˆ¶çª—å£å¥æŸ„
+	 * @param[in]		text									: æ¶ˆæ¯æ–‡æœ¬
+	 * @param[in]		caption									: æ ‡é¢˜æ–‡æœ¬
+	 * @param[in]		uType									: æ¶ˆæ¯æ¡†ç±»å‹
+	 * @param[in]		x										: Xåæ ‡
+	 * @param[in]		y										: Yåæ ‡
 	 */
 	static MessageBoxWindow* ShowAsync(HWND hWnd, const std::wstring& text,
 		const std::wstring& caption, UINT uType,
 		int x, int y) {
-		// ±£´æµ±Ç°ÏûÏ¢¿òÊıÁ¿,ÓÃÓÚÈ·¶¨ĞÂ´´½¨µÄÊÇÄÄ¸ö
+		// ä¿å­˜å½“å‰æ¶ˆæ¯æ¡†æ•°é‡,ç”¨äºç¡®å®šæ–°åˆ›å»ºçš„æ˜¯å“ªä¸ª
 		size_t startCount;
 		{
 			std::lock_guard<std::mutex> lock(boxesMutex);
 			startCount = allMessageBoxes.size();
 		}
 
-		// ÔÚĞÂÏß³ÌÖĞÏÔÊ¾ÏûÏ¢¿ò
+		// åœ¨æ–°çº¿ç¨‹ä¸­æ˜¾ç¤ºæ¶ˆæ¯æ¡†
 		std::thread t(MessageBoxThread, hWnd, text, caption, uType, x, y);
-		t.detach(); // ·ÖÀëÏß³Ì,Ê¹Æä¶ÀÁ¢ÔËĞĞ
+		t.detach(); // åˆ†ç¦»çº¿ç¨‹,ä½¿å…¶ç‹¬ç«‹è¿è¡Œ
 
-		// µÈ´ıĞÂ´°¿Ú´´½¨Íê³É
+		// ç­‰å¾…æ–°çª—å£åˆ›å»ºå®Œæˆ
 		std::unique_lock<std::mutex> lock(boxesMutex);
 		if (newBoxCV.wait_for(lock, std::chrono::seconds(3),
 			[startCount]() { return allMessageBoxes.size() > startCount; })) {
-			// ·µ»Ø×îĞÂ´´½¨µÄÏûÏ¢¿ò¶ÔÏó
+			// è¿”å›æœ€æ–°åˆ›å»ºçš„æ¶ˆæ¯æ¡†å¯¹è±¡
 			return allMessageBoxes.back();
 		}
 
-		return nullptr; // ³¬Ê±
+		return nullptr; // è¶…æ—¶
 	}
 
 
 
 	/**
-	 * @brief													: ÔÚÖ¸¶¨Î»ÖÃÏÔÊ¾ÏûÏ¢¿ò²¢·µ»Ø¶ÔÏó(×èÈû°æ±¾,±£³ÖÏòºó¼æÈİ)
-	 * @details													: ÄÚ²¿µ÷ÓÃ·Ç×èÈû°æ±¾µÄShowAsyncº¯Êı
+	 * @brief													: åœ¨æŒ‡å®šä½ç½®æ˜¾ç¤ºæ¶ˆæ¯æ¡†å¹¶è¿”å›å¯¹è±¡(é˜»å¡ç‰ˆæœ¬,ä¿æŒå‘åå…¼å®¹)
+	 * @details													: å†…éƒ¨è°ƒç”¨éé˜»å¡ç‰ˆæœ¬çš„ShowAsyncå‡½æ•°
 	 * @return 
 	 * 
-	 * @param[in]		hWnd									: ¸¸´°¿Ú¾ä±ú
-	 * @param[in]		text									: ÏûÏ¢ÎÄ±¾
-	 * @param[in]		caption									: ±êÌâÎÄ±¾
-	 * @param[in]		uType									: ÏûÏ¢¿òÀàĞÍ
-	 * @param[in]		x										: X×ø±ê
-	 * @param[in]		y										: Y×ø±ê
+	 * @param[in]		hWnd									: çˆ¶çª—å£å¥æŸ„
+	 * @param[in]		text									: æ¶ˆæ¯æ–‡æœ¬
+	 * @param[in]		caption									: æ ‡é¢˜æ–‡æœ¬
+	 * @param[in]		uType									: æ¶ˆæ¯æ¡†ç±»å‹
+	 * @param[in]		x										: Xåæ ‡
+	 * @param[in]		y										: Yåæ ‡
 	 */
 	static MessageBoxWindow* Show(HWND hWnd,
 		const std::wstring& text, const std::wstring& caption,
@@ -646,14 +646,14 @@ public:
 
 
 	/**
-	 * @brief													: ´´½¨¶à¸öËæ»úÎ»ÖÃµÄÏûÏ¢¿ò²¢·µ»Ø¶ÔÏóÁĞ±í(·Ç×èÈû°æ±¾)
-	 * @details													: ÄÚ²¿Æô¶¯¶à¸öÏß³ÌÒÀ´Î´´½¨ÏûÏ¢¿ò,²¢·µ»ØËùÓĞ´´½¨µÄMessageBoxWindow¶ÔÏóÁĞ±í
-	 * @return													: MessageBoxWindow¶ÔÏóÖ¸ÕëÁĞ±í
+	 * @brief													: åˆ›å»ºå¤šä¸ªéšæœºä½ç½®çš„æ¶ˆæ¯æ¡†å¹¶è¿”å›å¯¹è±¡åˆ—è¡¨(éé˜»å¡ç‰ˆæœ¬)
+	 * @details													: å†…éƒ¨å¯åŠ¨å¤šä¸ªçº¿ç¨‹ä¾æ¬¡åˆ›å»ºæ¶ˆæ¯æ¡†,å¹¶è¿”å›æ‰€æœ‰åˆ›å»ºçš„MessageBoxWindowå¯¹è±¡åˆ—è¡¨
+	 * @return													: MessageBoxWindowå¯¹è±¡æŒ‡é’ˆåˆ—è¡¨
 	 * 
-	 * @param[in]		text									: ÏûÏ¢ÎÄ±¾
-	 * @param[in]		caption									: ±êÌâÎÄ±¾
-	 * @param[in]		uType									: ÏûÏ¢¿òÀàĞÍ
-	 * @param[in]		num										: ´´½¨ÊıÁ¿
+	 * @param[in]		text									: æ¶ˆæ¯æ–‡æœ¬
+	 * @param[in]		caption									: æ ‡é¢˜æ–‡æœ¬
+	 * @param[in]		uType									: æ¶ˆæ¯æ¡†ç±»å‹
+	 * @param[in]		num										: åˆ›å»ºæ•°é‡
 	 */
 	static std::vector<MessageBoxWindow*> CreateRandomWindowsAsync(
 		const std::wstring& text, const std::wstring& caption,
@@ -690,14 +690,14 @@ public:
 
 
 	/**
-	 * @brief													: ´´½¨¶à¸öËæ»úÎ»ÖÃµÄÏûÏ¢¿ò²¢·µ»Ø¶ÔÏóÁĞ±í(±£³ÖÏòºó¼æÈİ)
-	 * @details													: ÄÚ²¿µ÷ÓÃ·Ç×èÈû°æ±¾µÄCreateRandomWindowsAsyncº¯Êı
-	 * @return													: MessageBoxWindow¶ÔÏóÖ¸ÕëÁĞ±í
+	 * @brief													: åˆ›å»ºå¤šä¸ªéšæœºä½ç½®çš„æ¶ˆæ¯æ¡†å¹¶è¿”å›å¯¹è±¡åˆ—è¡¨(ä¿æŒå‘åå…¼å®¹)
+	 * @details													: å†…éƒ¨è°ƒç”¨éé˜»å¡ç‰ˆæœ¬çš„CreateRandomWindowsAsyncå‡½æ•°
+	 * @return													: MessageBoxWindowå¯¹è±¡æŒ‡é’ˆåˆ—è¡¨
 	 * 
-	 * @param[in]		text									: ÏûÏ¢ÎÄ±¾
-	 * @param[in]		caption									: ±êÌâÎÄ±¾
-	 * @param[in]		uType									: ÏûÏ¢¿òÀàĞÍ
-	 * @param[in]		num										: ´´½¨ÊıÁ¿
+	 * @param[in]		text									: æ¶ˆæ¯æ–‡æœ¬
+	 * @param[in]		caption									: æ ‡é¢˜æ–‡æœ¬
+	 * @param[in]		uType									: æ¶ˆæ¯æ¡†ç±»å‹
+	 * @param[in]		num										: åˆ›å»ºæ•°é‡
 	 */
 	static std::vector<MessageBoxWindow*> CreateRandomWindows(
 		const std::wstring& text, const std::wstring& caption,
@@ -709,11 +709,11 @@ public:
 	
 
 	/**
-	 * @brief													: ¹Ø±ÕÖ¸¶¨µÄµ¥¸öÏûÏ¢¿ò
-	 * @details													: ²éÕÒ²¢¹Ø±Õ´«ÈëµÄMessageBoxWindow¶ÔÏó¶ÔÓ¦µÄ´°¿Ú
-	 * @return													: ÊÇ·ñ³É¹¦¹Ø±Õ
+	 * @brief													: å…³é—­æŒ‡å®šçš„å•ä¸ªæ¶ˆæ¯æ¡†
+	 * @details													: æŸ¥æ‰¾å¹¶å…³é—­ä¼ å…¥çš„MessageBoxWindowå¯¹è±¡å¯¹åº”çš„çª—å£
+	 * @return													: æ˜¯å¦æˆåŠŸå…³é—­
 	 * 
-	 * @param[in]		msgBox									: Òª¹Ø±ÕµÄMessageBoxWindow¶ÔÏóÖ¸Õë
+	 * @param[in]		msgBox									: è¦å…³é—­çš„MessageBoxWindowå¯¹è±¡æŒ‡é’ˆ
 	 */
 	static bool CloseMessageBox(MessageBoxWindow* msgBox) {
 		if (!msgBox) return false;
@@ -722,7 +722,7 @@ public:
 
 		auto it = std::find(
 			allMessageBoxes.begin(), allMessageBoxes.end(),
-			msgBox);											///< ²éÕÒ²¢¹Ø±ÕÖ¸¶¨µÄÏûÏ¢¿ò
+			msgBox);											///< æŸ¥æ‰¾å¹¶å…³é—­æŒ‡å®šçš„æ¶ˆæ¯æ¡†
 		if (it != allMessageBoxes.end()) {
 			(*it)->Close();
 			return true;
@@ -734,11 +734,11 @@ public:
 
 
 	/**
-	 * @brief													: Í¨¹ı´°¿Ú¾ä±ú¹Ø±Õµ¥¸öÏûÏ¢¿ò
-	 * @details													: ²éÕÒ²¢¹Ø±Õ¶ÔÓ¦¾ä±úµÄÏûÏ¢¿ò´°¿Ú
-	 * @return													: ÊÇ·ñ³É¹¦¹Ø±Õ
+	 * @brief													: é€šè¿‡çª—å£å¥æŸ„å…³é—­å•ä¸ªæ¶ˆæ¯æ¡†
+	 * @details													: æŸ¥æ‰¾å¹¶å…³é—­å¯¹åº”å¥æŸ„çš„æ¶ˆæ¯æ¡†çª—å£
+	 * @return													: æ˜¯å¦æˆåŠŸå…³é—­
 	 * 
-	 * @param[in]		hWnd									: Òª¹Ø±ÕµÄ´°¿Ú¾ä±ú
+	 * @param[in]		hWnd									: è¦å…³é—­çš„çª—å£å¥æŸ„
 	 */
 	static bool CloseMessageBoxByHandle(HWND hWnd) {
 		if (!hWnd) return false;
@@ -758,11 +758,11 @@ public:
 	
 
 	/**
-	 * @brief													: Í¨¹ıË÷Òı¹Ø±Õµ¥¸öÏûÏ¢¿ò
-	 * @details													: ²éÕÒ²¢¹Ø±Õ¶ÔÓ¦Ë÷ÒıµÄÏûÏ¢¿ò´°¿Ú
-	 * @return													: ÊÇ·ñ³É¹¦¹Ø±Õ
+	 * @brief													: é€šè¿‡ç´¢å¼•å…³é—­å•ä¸ªæ¶ˆæ¯æ¡†
+	 * @details													: æŸ¥æ‰¾å¹¶å…³é—­å¯¹åº”ç´¢å¼•çš„æ¶ˆæ¯æ¡†çª—å£
+	 * @return													: æ˜¯å¦æˆåŠŸå…³é—­
 	 * 
-	 * @param[in]		index									: Òª¹Ø±ÕµÄÏûÏ¢¿òË÷Òı
+	 * @param[in]		index									: è¦å…³é—­çš„æ¶ˆæ¯æ¡†ç´¢å¼•
 	 */
 	static bool CloseMessageBoxByIndex(int index) {
 		std::lock_guard<std::mutex> lock(boxesMutex);
@@ -779,9 +779,9 @@ public:
 
 
 	/**
-	 * @brief													: »ñÈ¡ËùÓĞ»îÔ¾µÄÏûÏ¢¿ò¶ÔÏó
-	 * @details													: ÇåÀíÒÑ¹Ø±ÕµÄ´°¿Úºó·µ»Øµ±Ç°´æ»îµÄMessageBoxWindow¶ÔÏóÁĞ±í
-	 * @return													: MessageBoxWindow¶ÔÏóÖ¸ÕëÁĞ±í
+	 * @brief													: è·å–æ‰€æœ‰æ´»è·ƒçš„æ¶ˆæ¯æ¡†å¯¹è±¡
+	 * @details													: æ¸…ç†å·²å…³é—­çš„çª—å£åè¿”å›å½“å‰å­˜æ´»çš„MessageBoxWindowå¯¹è±¡åˆ—è¡¨
+	 * @return													: MessageBoxWindowå¯¹è±¡æŒ‡é’ˆåˆ—è¡¨
 	 */
 	static std::vector<MessageBoxWindow*> GetAllMessageBoxes() {
 		std::lock_guard<std::mutex> lock(boxesMutex);
@@ -796,7 +796,7 @@ public:
 				return false;
 			});
 
-		allMessageBoxes.erase(it, allMessageBoxes.end());		///< ÇåÀíÒÑ¹Ø±ÕµÄ´°¿Ú
+		allMessageBoxes.erase(it, allMessageBoxes.end());		///< æ¸…ç†å·²å…³é—­çš„çª—å£
 
 		return allMessageBoxes;
 	}
@@ -804,8 +804,8 @@ public:
 	
 
 	/**
-	 * @brief													: ÇåÀíËùÓĞÒÑ¹Ø±ÕµÄÏûÏ¢¿ò¶ÔÏó
-	 * @details													: É¾³ıËùÓĞ²»ÔÙ´æ»îµÄMessageBoxWindow¶ÔÏó,ÊÍ·ÅÄÚ´æ
+	 * @brief													: æ¸…ç†æ‰€æœ‰å·²å…³é—­çš„æ¶ˆæ¯æ¡†å¯¹è±¡
+	 * @details													: åˆ é™¤æ‰€æœ‰ä¸å†å­˜æ´»çš„MessageBoxWindowå¯¹è±¡,é‡Šæ”¾å†…å­˜
 	 */
 	static void Cleanup() {
 		std::lock_guard<std::mutex> lock(boxesMutex);
@@ -825,8 +825,8 @@ public:
 	
 
 	/**
-	 * @brief													: ¹Ø±ÕËùÓĞÏûÏ¢¿ò(fixed ver.)
-	 * @details													: ÏÈ¹Ø±ÕËùÓĞ´°¿Ú,È»ºóÇåÀíÒÑ¹Ø±ÕµÄ´°¿Ú¶ÔÏó
+	 * @brief													: å…³é—­æ‰€æœ‰æ¶ˆæ¯æ¡†(fixed ver.)
+	 * @details													: å…ˆå…³é—­æ‰€æœ‰çª—å£,ç„¶åæ¸…ç†å·²å…³é—­çš„çª—å£å¯¹è±¡
 	 * 
 	 */
 	static void CloseAll() {
@@ -836,7 +836,7 @@ public:
 			if (msgBox && msgBox->IsAlive()) {
 				msgBox->Close();
 			}
-		}														///< ÏÈ¹Ø±ÕËùÓĞ´°¿Ú
+		}														///< å…ˆå…³é—­æ‰€æœ‰çª—å£
 
 		
 		auto it = std::remove_if(allMessageBoxes.begin(), allMessageBoxes.end(),
@@ -846,7 +846,7 @@ public:
 					return true;
 				}
 				return false;
-			});													///< È»ºóÇåÀí
+			});													///< ç„¶åæ¸…ç†
 
 		allMessageBoxes.erase(it, allMessageBoxes.end());
 	}
@@ -854,9 +854,9 @@ public:
 	
 
 	/**
-	 * @brief													: »ñÈ¡»îÔ¾µÄÏûÏ¢¿òÊıÁ¿
-	 * @details													: ÇåÀíÒÑ¹Ø±ÕµÄ´°¿Úºó·µ»Øµ±Ç°´æ»îµÄÏûÏ¢¿òÊıÁ¿
-	 * @return													: »îÔ¾µÄÏûÏ¢¿òÊıÁ¿
+	 * @brief													: è·å–æ´»è·ƒçš„æ¶ˆæ¯æ¡†æ•°é‡
+	 * @details													: æ¸…ç†å·²å…³é—­çš„çª—å£åè¿”å›å½“å‰å­˜æ´»çš„æ¶ˆæ¯æ¡†æ•°é‡
+	 * @return													: æ´»è·ƒçš„æ¶ˆæ¯æ¡†æ•°é‡
 	 */
 	static size_t GetMessageBoxCount() {
 		std::lock_guard<std::mutex> lock(boxesMutex);
@@ -866,11 +866,11 @@ public:
 	
 
 	/**
-	 * @brief													: Í¨¹ıË÷Òı»ñÈ¡ÏûÏ¢¿ò¶ÔÏó
-	 * @details													: ÇåÀíÒÑ¹Ø±ÕµÄ´°¿Úºó·µ»Ø¶ÔÓ¦Ë÷ÒıµÄMessageBoxWindow¶ÔÏó,ÈôË÷ÒıÎŞĞ§Ôò·µ»Ønullptr
-	 * @return													: MessageBoxWindow¶ÔÏóÖ¸Õë»ònullptr
+	 * @brief													: é€šè¿‡ç´¢å¼•è·å–æ¶ˆæ¯æ¡†å¯¹è±¡
+	 * @details													: æ¸…ç†å·²å…³é—­çš„çª—å£åè¿”å›å¯¹åº”ç´¢å¼•çš„MessageBoxWindowå¯¹è±¡,è‹¥ç´¢å¼•æ— æ•ˆåˆ™è¿”å›nullptr
+	 * @return													: MessageBoxWindowå¯¹è±¡æŒ‡é’ˆæˆ–nullptr
 	 * 
-	 * @param[in]		index									: Òª»ñÈ¡µÄÏûÏ¢¿òË÷Òı
+	 * @param[in]		index									: è¦è·å–çš„æ¶ˆæ¯æ¡†ç´¢å¼•
 	 */
 	static MessageBoxWindow* GetMessageBoxByIndex(int index) {
 		std::lock_guard<std::mutex> lock(boxesMutex);
@@ -885,11 +885,11 @@ public:
 	
 
 	/**
-	 * @brief													: Í¨¹ı´°¿Ú¾ä±ú»ñÈ¡ÏûÏ¢¿ò¶ÔÏó
-	 * @details													: ²éÕÒ²¢·µ»Ø¶ÔÓ¦¾ä±úµÄMessageBoxWindow¶ÔÏó,ÈôÎ´ÕÒµ½Ôò·µ»Ønullptr
-	 * @return													: MessageBoxWindow¶ÔÏóÖ¸Õë»ònullptr
+	 * @brief													: é€šè¿‡çª—å£å¥æŸ„è·å–æ¶ˆæ¯æ¡†å¯¹è±¡
+	 * @details													: æŸ¥æ‰¾å¹¶è¿”å›å¯¹åº”å¥æŸ„çš„MessageBoxWindowå¯¹è±¡,è‹¥æœªæ‰¾åˆ°åˆ™è¿”å›nullptr
+	 * @return													: MessageBoxWindowå¯¹è±¡æŒ‡é’ˆæˆ–nullptr
 	 * 
-	 * @param hWnd												: Òª»ñÈ¡µÄ´°¿Ú¾ä±ú
+	 * @param hWnd												: è¦è·å–çš„çª—å£å¥æŸ„
 	 */
 	static MessageBoxWindow* GetMessageBoxByHandle(HWND hWnd) {
 		std::lock_guard<std::mutex> lock(boxesMutex);
@@ -906,13 +906,16 @@ public:
 
 
 
-int Msgbox::MsgBox_X = 0;
-int Msgbox::MsgBox_Y = 0;
-std::vector<MessageBoxWindow*> Msgbox::allMessageBoxes;
-std::atomic<int> Msgbox::nextId(0);
-std::mutex Msgbox::boxesMutex;
-std::condition_variable Msgbox::newBoxCV;
+// è¯´æ˜ï¼šè¿™äº›é™æ€æˆå‘˜å¦‚æœåœ¨å¤´æ–‡ä»¶é‡Œâ€œç›´æ¥å®šä¹‰â€ï¼Œä¸€æ—¦è¢«å¤šä¸ª .cpp åŒ…å«å°±ä¼šå‡ºç°é‡å¤é“¾æ¥é”™è¯¯ï¼ˆODR è¿è§„ï¼‰ã€‚
+// C++17 èµ·æ”¯æŒ `inline` å˜é‡ï¼šå¯ä»¥å®‰å…¨åœ°æŠŠâ€œå®šä¹‰â€æ”¾åœ¨å¤´æ–‡ä»¶é‡Œã€‚
+inline int Msgbox::MsgBox_X = 0;
+inline int Msgbox::MsgBox_Y = 0;
+inline std::vector<MessageBoxWindow*> Msgbox::allMessageBoxes{};
+inline std::atomic<int> Msgbox::nextId{ 0 };
+inline std::mutex Msgbox::boxesMutex{};
+inline std::condition_variable Msgbox::newBoxCV{};
 
 
 
 #endif                                                          ///< !MESSAGEBOX_WINDOW_HPP
+
