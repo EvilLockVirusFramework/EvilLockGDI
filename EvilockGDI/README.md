@@ -1,175 +1,151 @@
-# EvilockGDI：给小朋友的 Windows 画板特效库（GDI）
+# EvilockGDI：给小朋友的 Windows 画板特效库（C++20 / GDI）
 
-这是一个在 Windows 上用 **GDI（画图工具）** 做特效的小库。你可以把它当成“会动的画笔/画板”，像学海龟绘图一样，几行代码就能画出图形、文字特效、甚至把屏幕/窗口像素拿来做“花屏”特效。
+这是一个“像 Python 一样好上手”的 Windows 画板库：你可以用**画笔**画线、画多边形、画圆；也可以用 **PixelCanvas** 做 **旋转 / 缩放 / 平移 / 真透视（像 3D 翻转）/ 鱼眼** 这些特效。
 
-> 温馨提示：有些特效会闪烁、会弹窗、会在屏幕上动来动去。请在家长/老师陪同下使用，不要在上课或重要场合乱跑它。
-
----
-
-## 你能做什么（功能总览）
-
-### 1）画笔 `Pen`（像海龟一样画图）
-文件：`draw.hpp`
-
-你可以像这样控制画笔：
-- `penup()` / `pendown()`：抬笔/落笔（抬笔移动不画线）
-- `forward(n)` / `backward(n)`：前进/后退
-- `left(deg)` / `right(deg)`：左转/右转
-- `goto_xy(x, y)`：瞬移到某个位置
-- `home()`：回到“家”（默认窗口中心）
-- `drawCircle(r)`：画圆
-- `drawArc(r, deg, CW/CCW)`：画圆弧
-- `drawPolygon(sides, len)`：画多边形
-- `drawTextWithIcons(...)`：用小图标拼出文字（支持中文）
-- `beginFill(...)` / `endFill()`：把封闭图形用图标“填满”
-
-**小知识：坐标系**
-- 画板左上角是 `(0,0)`
-- 往右是 x 变大，往下是 y 变大
-- 角度 0 度默认指向右边
+> 安全提示：有些特效会闪烁/移动/弹窗，请在家长或老师陪同下使用，不要在上课或重要场合乱跑。
 
 ---
 
-### 2）像素画板 `PixelCanvas`（抓一帧→改像素→贴回去）
-文件：`PixelCanvas.hpp`
+## 1）儿童模式（推荐）：`kids.hpp` —— 像 Python 一样写
 
-这个功能就是把“屏幕/窗口/任意 DC”当成一张图片：
-1. `Capture()` 把画面抓到内存里
-2. 你直接修改 `pixels()` 里的像素（就像改图片的每个点）
-3. `Present()` 再贴回去
+儿童模式的目标：**你不需要懂消息循环、线程等待、HDC**。你只要记住 4 个词：
 
-它默认用屏幕 DC（所以不传参数也能玩），也可以传入窗口 DC，或者用 `PixelCanvas::FromWindow(hwnd)` 只对某个窗口做特效。
+- `open(...)`：打开画板窗口
+- `present()`：把你画的东西“显示出来”
+- `wait(ms)`：等一下（让动画有时间动起来）
+- `alive()`：窗口还在不在（如果被你关掉了就停止）
 
----
+### 1.1 最小可运行示例（完整 `main()`，直接复制就能跑）
 
-### 3）窗口画板（带边框 / 分层透明窗口）
-文件：`BorderedWindowGDI.hpp`、`LayeredWindowGdi.hpp`
+把你的 `test.cpp`（或新建的 `main.cpp`）改成下面这样：
 
-你可以创建一个窗口，然后让窗口：
-- 在屏幕上移动、反弹
-- 抖动（Shake）
-- 旋转（Rotate / turnLeft / turnRight）
-- 亮度/对比度/饱和度调整（部分函数）
-- 加载图片并绘制到窗口上
-
-**带边框窗口**：像普通程序窗口  
-**分层窗口**：可以透明、置顶，适合做“悬浮特效”
-
----
-
-### 4）分层文字特效 `LayeredTextOut`（彩虹、波浪、鱼眼、漩涡、像素化…）
-文件：`LayeredTextout.hpp`
-
-它会创建一个透明置顶的小窗口，显示炫酷文字：
-- 彩虹渐变 / 两色渐变 / 纯色
-- 波浪扭曲（Wave）
-- 鱼眼（FishEye）
-- 漩涡（Twirl）
-- 像素化（Pixelate）
-- 灰度（Grayscale）/ 反色（Invert）
-- 对比度/亮度
-- 宽扁拉伸 + 3D 旋转（更像立体标题）
-
-你可以用 `SetText()` 改文字，用 `Show()/Hide()/Destroy()` 控制显示。
-
----
-
-### 5）弹窗波浪 `WaveEffect`（消息框排队像波浪一样动）
-文件：`MessageBoxWave.hpp`、`MessageBoxWindow.hpp`
-
-它会创建一串系统消息框，让它们沿着轨迹移动，像“波浪队列”。
-- `WaveEffect::CreateWaveEffect(...)`：开始
-- `WaveEffect::StopWaveEffect()`：停止并清理
-
-> 注意：它会弹很多窗口，玩完要记得停止。
-
----
-
-## 我该怎么运行（小白步骤）
-
-### 用 Visual Studio（推荐）
-1. 用 VS2022 打开 `EvilockGDI.vcxproj`
-2. 选择配置：`Debug` + `x64`
-3. 生成并运行
-
-项目里有一个“演示/冒烟测试”入口：`test.cpp`  
-它会依次演示：画笔、像素特效、窗口移动旋转、分层文字、弹窗波浪等。
-
----
-
-## 3 个最简单的例子（抄了就能跑）
-
-### 例子 A：用 `Pen` 画图
 ```cpp
-// 在 WM_PAINT 的 HDC 里画
-Pen pen(hdc, LoadIcon(nullptr, IDI_WARNING));
-pen.speed(0);
-pen.clearCanvas();
+#define NOMINMAX
+#include <Windows.h>
 
-pen.penup();
-pen.goto_xy(300, 200);
-pen.pendown();
-pen.drawCircle(60);
-```
+#include "kids.hpp"
+using namespace evgdi::kids;
 
-### 例子 B：用 `PixelCanvas` 改像素
-```cpp
-evgdi::PixelCanvas canvas; // 默认：屏幕
-canvas.Capture();
+int main()
+{
+  open(800, 520, L"我的第一个画板");
+  clear(RGB(255, 255, 255));
 
-auto* px = canvas.pixels();
-for (int y = 0; y < canvas.height(); ++y) {
-  for (int x = 0; x < canvas.width(); ++x) {
-    px[y * canvas.width() + x].rgb ^= (x * y); // 简单异或特效
+  pensize(3);
+  speed(0); // 0 = 最快（不延迟）
+
+  // 1) 画一个彩色小螺旋（边画边显示）
+  for (int i = 0; i < 240 && alive(); ++i) {
+    pencolor(RGB((i * 7) % 256, (i * 3) % 256, (i * 11) % 256));
+    forward(3 + i / 10);
+    right(12);
+    present();
+    wait(16); // 约 60 帧/秒
   }
+
+  // 2) 现在试试特效：真透视（像 3D 翻卡片）+ 鱼眼
+  effects_on();          // 开启 PixelCanvas 特效模式（默认是关的）
+  perspective_on(0.0022f);
+  fisheye_on(0.75f, 220.0f);
+
+  for (int t = 0; t < 360 && alive(); ++t) {
+    rotate_x(18.0f * sinf(t * 0.03f));
+    rotate_y(25.0f * cosf(t * 0.025f));
+    rotate_z(t * 0.5f);
+
+    // 鱼眼中心在画板里来回跑
+    fisheye_at(400.0f + sinf(t * 0.04f) * 120.0f, 260.0f + cosf(t * 0.03f) * 80.0f);
+
+    present();
+    wait(16);
+  }
+
+  close();
+  return 0;
 }
-
-canvas.Present();
 ```
 
-### 例子 C：分层文字特效
+### 1.2 `kids.hpp` 的函数说明（给小朋友看的）
+
+#### A）窗口与时间
+- `open(w, h, title)`：打开一个画板窗口（宽 `w`、高 `h`、标题 `title`）。
+- `close()`：关掉画板窗口。
+- `alive()`：窗口还活着吗？（你点右上角 X 以后会变成 `false`）
+- `wait(ms)`：等 `ms` 毫秒（常用 `16`，表示“一小会儿”）
+- `clear(color)`：把画板涂成一种颜色（默认白色）
+- `present()`：把“当前画板内容”显示到屏幕上（做动画一定要不停调用它）
+
+#### B）画笔（像海龟一样）
+- `penup()` / `pendown()`：抬笔/落笔（抬笔移动不画线）
+- `speed(ms)`：画笔速度（越小越快，`0` 最快）
+- `pensize(w)`：线条粗细（像素）
+- `pencolor(RGB(r,g,b))`：线条颜色
+- `home()`：回到“家”（画板中心）
+- `goto_xy(x, y)`：瞬移到坐标（x 向右变大，y 向下变大）
+- `forward(d)` / `backward(d)`：向前/向后走 `d` 像素
+- `left(deg)` / `right(deg)`：左转/右转 `deg` 度
+- `circle(r)`：画一个圆（半径 `r`）
+- `polygon(sides, len)`：画正多边形（`sides` 边数，`len` 每条边长度）
+
+#### C）特效（PixelCanvas：默认使用“状态机制”，你也可以关掉）
+> 小朋友可以先不管原理：你只要知道这些会把整个画板“变形”。
+
+- `effects_on()`：开启特效模式（之后 `present()` 会显示特效后的画面）
+- `effects_off()`：关闭特效模式（`present()` 直接显示原画面）
+- `effects_reset()`：把特效状态清零（回到“没变形”的样子）
+- `fast(true/false)`：快速模式（更快但可能更糊）
+- `state(true/false)`：状态机制开关（默认是开；关掉就需要你自己每次把参数传全）
+- `perspective_on(strength)` / `perspective_off()`：真透视投影开/关（`strength` 越大越“3D”）
+- `rotate_x(deg)` / `rotate_y(deg)` / `rotate_z(deg)`：绕 X/Y/Z 轴旋转（单位：度）
+- `move(dx, dy)`：平移（单位：像素）
+- `zoom(s)`：缩放（`1.0` 不变，`2.0` 变大一倍，`0.5` 变小一半）
+- `push_z(dz)`：往镜头前后推（配合透视更明显）
+- `fisheye_on(strength, radius)` / `fisheye_off()`：鱼眼开/关
+- `fisheye_at(cx, cy, strength, radius)`：指定鱼眼中心（更好玩）
+
+#### D）弹窗波浪（不用懂 hook）
+> 你只要把它当成“会动的消息框”。
+
+- `wavebox(text, caption, durationMs, ...)`：一键播放波浪弹窗（最简单）
+- `wavebox_circle(text, durationMs, ...)`：沿圆形轨迹跑（很酷）
+- `wavebox_rect(text, durationMs, ...)`：沿矩形轨迹跑（像巡逻队）
+
+最短示例（完整 `main()`）：
 ```cpp
-LayeredTextOut t;
-t.Create(720, 220);
-t.SetText(L"你好，我是特效文字！");
-t.SetFontSize(44);
-t.SetRainbowMode(true);
-t.EnableWave(true, 14.0f, 8.0f);
-t.Show();
+#include "kids.hpp"
+using namespace evgdi::kids;
+
+int main() {
+  wavebox_circle(L"我在绕圈跑！", 4000);
+  wavebox_rect(L"我在绕边巡逻！", 4000);
+}
 ```
 
 ---
 
-## 小朋友常见问题（FAQ）
+## 2）进阶模式（想当“魔法师”再看）
 
-### Q1：为什么“抬笔”了还是会有点？
-有些模式是“用图标一步一步盖上去”，就算抬笔，你如果调用了“画图函数”，它还是会画。抬笔只影响“移动时是否画线”。
+如果你想自己控制更多细节，可以直接用这些头文件（每个文件里都有中文注释）：
 
-### Q2：为什么会卡？
-因为像素处理相当于“对每个像素点做数学题”。画面越大、效果越多，就越费电脑。你可以：
-- 把窗口大小调小
-- 关掉不需要的滤镜（比如像素化 + 颜色处理同时开最吃性能）
+- `draw.hpp`：`Pen` 画笔（画线、画圆、画多边形、画文字点阵等）
+- `PixelCanvas.hpp`：像素画布（旋转/缩放/平移/真透视/鱼眼，默认“状态机制”）
+- `LayeredTextout.hpp`：分层文字特效（波浪、鱼眼、3D 变化等）
+- `LayeredWindowGdi.hpp`：分层窗口/位图呈现
+- `MessageBoxWave.hpp` / `MessageBoxWindow.hpp`：弹窗特效
+- `BorderedWindowGDI.hpp`：带边框的窗口演示
 
-### Q3：我不想影响整个桌面怎么办？
-优先对“窗口”操作：
-- `PixelCanvas::FromWindow(hwnd)` 只处理某个窗口
-- `ScreenGDI::FromWindow(hwnd)`（旧接口）也是同样思路
+仓库里自带全功能演示入口：`test.cpp`（会依次演示多种效果）。
 
 ---
 
-## 安全提示（一定要看）
-- 不要在别人电脑上乱跑“花屏/弹窗”类效果
-- 不要长时间全屏闪烁（眼睛会不舒服）
-- 如果出现很多弹窗，优先按 `Alt + F4` 关闭，或在代码里 `StopWaveEffect()`
+## 3）常见问题（看这里就不慌）
 
----
+1. **窗口不动/看不到动画？**  
+   做动画时，循环里要反复调用：`present(); wait(16);`
 
-## 文件索引（你会经常打开的）
-- `draw.hpp`：画笔 `Pen`
-- `PixelCanvas.hpp`：像素画板（默认屏幕，也可传 DC）
-- `LayeredTextout.hpp`：分层文字特效
-- `LayeredWindowGdi.hpp`：分层窗口画板
-- `BorderedWindowGDI.hpp`：带边框窗口画板
-- `MessageBoxWave.hpp` / `MessageBoxWindow.hpp`：弹窗波浪
-- `test.cpp`：演示/测试入口
+2. **看到中文乱码？**  
+   - 如果是 VS 里：把文件“另存为 UTF-8（带签名/BOM）”再打开；  
+   - 如果是命令行里：PowerShell 有时会把 UTF-8 当成 ANSI 来显示，这是显示问题，不影响编译。
 
+3. **特效太卡？**  
+   先试试：`fast(true);`，或者把窗口开小一点（比如 640×360）。

@@ -44,6 +44,48 @@ private:
 	HICON fillIcon;												///< 填充图标句柄
 	int fillDensity;											///< 填充密度（图标间距）
 
+	/**
+	 * @brief 获取当前“画布”的客户区矩形（兼容窗口DC / 内存DC）
+	 * @details
+	 * - 如果 hdc 关联到窗口：优先取窗口客户区大小；
+	 * - 如果是内存DC：优先取当前选入的位图大小；
+	 * - 再不行才退化到 GetDeviceCaps。
+	 *
+	 * 这样 kids.hpp / PixelCanvas 这类“先画到内存，再统一呈现”的用法也能正常工作。
+	 */
+	[[nodiscard]] RECT canvasRect_() const
+	{
+		RECT rect{ 0,0,0,0 };
+
+		if (hdc) {
+			if (HWND hwnd = WindowFromDC(hdc)) {
+				RECT r{};
+				if (GetClientRect(hwnd, &r) && (r.right > r.left) && (r.bottom > r.top)) {
+					return r;
+				}
+			}
+
+			// 内存DC：尝试从当前选入的位图拿尺寸
+			if (HGDIOBJ obj = GetCurrentObject(hdc, OBJ_BITMAP)) {
+				BITMAP bm{};
+				if (GetObject(obj, sizeof(bm), &bm) == sizeof(bm) && bm.bmWidth > 0 && bm.bmHeight > 0) {
+					rect.right = bm.bmWidth;
+					rect.bottom = bm.bmHeight;
+					return rect;
+				}
+			}
+
+			// 兜底：屏幕/设备尺寸（某些DC这里也能工作）
+			rect.right = GetDeviceCaps(hdc, HORZRES);
+			rect.bottom = GetDeviceCaps(hdc, VERTRES);
+		}
+
+		// 最后兜底：给一个合理默认值，避免出现 0 导致除零/坐标异常
+		if (rect.right <= 0) rect.right = 800;
+		if (rect.bottom <= 0) rect.bottom = 600;
+		return rect;
+	}
+
 public:
 	/**
 	 * @brief													: 获取当前位置
@@ -63,9 +105,7 @@ public:
 		penColor(RGB(0, 0, 0)), penWidth(1), isFilling(false),
 		fillIcon(nullptr), fillDensity(15)
 	{
-		RECT rect;
-		GetClientRect(WindowFromDC(hdc), &rect);
-
+		const RECT rect = canvasRect_();
 		const float width = static_cast<float>(rect.right - rect.left);
 		const float height = static_cast<float>(rect.bottom - rect.top);
 
@@ -867,9 +907,7 @@ public:
 	 */
 	void clearCanvas() const
 	{
-		RECT rect;
-		GetClientRect(WindowFromDC(hdc), &rect);
-
+		const RECT rect = canvasRect_();
 		HBRUSH hBrush = (HBRUSH)GetStockObject(WHITE_BRUSH);
 		FillRect(hdc, &rect, hBrush);
 	}

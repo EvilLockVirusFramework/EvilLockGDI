@@ -261,6 +261,99 @@ namespace {
 		RunFor(std::chrono::milliseconds(400));
 	}
 
+	// ====================== 3B) PixelCanvas：旋转/缩放/移动/裁剪（内部用 GDI+） ======================
+	void TestPixelCanvasTransform(HINSTANCE hInst)
+	{
+		BorderedWindowGDI w(hInst, 820, 120, 520, 420);
+		w.Create("EvgdiCanvasTransform", "PixelCanvas 变换测试（旋转/缩放/移动/裁剪）", WS_OVERLAPPEDWINDOW);
+		if (!w.hWnd) throw_runtime_error("BorderedWindowGDI::Create failed (PixelCanvas transform).");
+
+		// 先在内存画布上画一张“静态底图”
+		{
+			RECT rect{ 0,0,w.windowWidth,w.windowHeight };
+			HBRUSH brush = CreateSolidBrush(RGB(10, 10, 20));
+			FillRect(w.hdcMem, &rect, brush);
+			DeleteObject(brush);
+
+			Pen pen(w.hdcMem, LoadIcon(nullptr, IDI_INFORMATION));
+			pen.speed(0);
+			pen.pensize(2);
+
+			pen.penup();
+			pen.goto_xy(260, 90);
+			pen.pendown();
+			pen.drawPolygon(6, 55);
+
+			pen.penup();
+			pen.goto_xy(260, 210);
+			pen.pendown();
+			pen.drawCircle(60);
+
+			pen.drawTextWithIcons(L"GDI+ MAGIC", 120, 320, 2.0f, 18, 6, L"Arial", 70);
+		}
+		BitBlt(w.hdcWindow, 0, 0, w.windowWidth, w.windowHeight, w.hdcMem, 0, 0, SRCCOPY);
+
+		// 关键：用 PixelCanvas 抓一帧（从 hdcMem），然后用它的“子方法”做旋转/缩放/裁剪
+		evgdi::PixelCanvas canvas(w.hdcMem, w.windowWidth, w.windowHeight);
+		canvas.Capture();
+
+		// 额外示例：直接用 HSL 颜色模型改像素（让左上角更“鲜艳”一点）
+		for (int y = 0; y < 70; ++y) {
+			for (int x = 0; x < 160; ++x) {
+				auto hsl = canvas.GetHsl(x, y);
+				hsl.s = (std::min)(1.0f, hsl.s + 0.35f);
+				hsl.l = (std::min)(1.0f, hsl.l + 0.05f);
+				canvas.SetHsl(x, y, hsl);
+			}
+		}
+
+		// 动起来：每一帧都用 GDI+ 把 canvas.hbitmap() 变形后画到窗口 DC
+		const auto start = std::chrono::steady_clock::now();
+		for (int i = 0; i < 210 && !g_quit; ++i)
+		{
+			const float t = std::chrono::duration<float>(std::chrono::steady_clock::now() - start).count();
+
+			// 新增：指定旋转中心（让“围绕某个点旋转”更直观）
+			canvas.Pivot(
+				(w.windowWidth * 0.5f) + std::sinf(t * 1.1f) * 90.0f,
+				(w.windowHeight * 0.5f) + std::cosf(t * 0.9f) * 60.0f
+			);
+
+			evgdi::PixelCanvas::TransformParams p{};
+			p.scale = 1.0f + std::sinf(t * 2.0f) * 0.18f;    // 缩放
+			p.rotationDeg = t * 35.0f;                      // 旋转
+			p.shearX = std::sinf(t * 1.3f) * 0.10f;         // 倾斜
+			p.shearY = std::cosf(t * 1.1f) * 0.06f;
+			p.offsetX = std::sinf(t * 3.2f) * 14.0f;        // 平移（抖动）
+			p.offsetY = std::cosf(t * 2.7f) * 10.0f;
+
+			// 前半段：用 ClipRect 做“裁剪”（只显示中间一块）
+			if (i < 105) {
+				p.enableClip = true;
+				p.clipRect = RECT{ 70, 40, w.windowWidth - 70, w.windowHeight - 40 };
+			}
+			// 后半段：用 SrcCrop 做“裁剪”（先从源图裁一块再变形）
+			else {
+				p.enableSrcCrop = true;
+				const int cx = static_cast<int>((std::sinf(t * 1.2f) * 0.5f + 0.5f) * (w.windowWidth * 0.4f));
+				const int cy = static_cast<int>((std::cosf(t * 1.1f) * 0.5f + 0.5f) * (w.windowHeight * 0.3f));
+				p.srcRect = RECT{ cx, cy, cx + w.windowWidth / 2, cy + w.windowHeight / 2 };
+			}
+
+			p.fast = (i % 2 == 0); // 让小朋友能看出“快/清晰”区别
+
+			canvas.PresentTransformed(p, w.hdcWindow);
+			RunFor(std::chrono::milliseconds(33));
+		}
+
+		if (w.hdcWindow) {
+			ReleaseDC(w.hWnd, w.hdcWindow);
+			w.hdcWindow = nullptr;
+		}
+		DestroyWindow(w.hWnd);
+		RunFor(std::chrono::milliseconds(400));
+	}
+
 	// ====================== 4) LayeredTextOut ======================
 	void TestLayeredTextOut()
 	{
@@ -369,6 +462,7 @@ namespace {
 			TestPenAndScreenGDI(hInst);
 			TestBorderedWindow(hInst);
 			TestLayeredWindow(hInst);
+			TestPixelCanvasTransform(hInst);
 			TestLayeredTextOut();
 			TestMessageBoxWave();
 

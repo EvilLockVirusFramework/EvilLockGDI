@@ -10,6 +10,7 @@
 #include <chrono>
 #include <algorithm>
 #include <cstdint>
+#include <cstring>
 
 #include "gdi_raii.hpp"
 
@@ -156,6 +157,10 @@ private:
     HDC tempDC_ = nullptr;              // view
     HBITMAP tempBmp_ = nullptr;         // view
     void* tempBits_ = nullptr;
+
+    // 波浪效果用的缓存（避免每帧重复分配）
+    std::vector<int> waveRowDx_;
+    std::vector<int> waveColDy_;
 
     evgdi::win::unique_hbrush bgBrushOwner_;
     HBRUSH bgBrush_ = nullptr;          // view
@@ -635,9 +640,8 @@ public:
         // 更新时间系统
         if (useAnimation_) {
             auto currentTime = std::chrono::steady_clock::now();
-            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-                currentTime - lastUpdateTime_);
-            float deltaTime = elapsed.count() * 0.001f;
+            // 用高精度秒数，避免“调用太频繁导致毫秒=0，从而动画不动”的问题
+            float deltaTime = std::chrono::duration<float>(currentTime - lastUpdateTime_).count();
 
             // 更新所有时间轴
             colorParams_.time += deltaTime * colorParams_.gradientSpeed;
@@ -904,26 +908,57 @@ private:
 
     // 鱼眼效果 - 使用PlgBlt
     void ApplyFishEyeEffect() {
-        auto ToLongRound = [](float v) -> LONG {
-            return static_cast<LONG>(std::lround(v));
+        // 说明：原先的 PlgBlt 版本更像“整体缩放/挤压”，鱼眼不明显。
+        // 这里改成真正的径向畸变（中心放大，边缘保持），会更像“鱼眼镜头”。
+
+        if (!dibBits_ || !tempBits_) return;
+
+        const int w = width_;
+        const int h = height_;
+        if (w <= 0 || h <= 0) return;
+
+        auto* dst = static_cast<std::uint32_t*>(dibBits_);
+        auto* src = static_cast<std::uint32_t*>(tempBits_);
+        const std::size_t bytes = static_cast<std::size_t>(w) * static_cast<std::size_t>(h) * sizeof(std::uint32_t);
+        std::memcpy(src, dst, bytes);
+
+        const float progress = filterEffects_.fishEyeProgress;
+        const float strength = std::clamp(filterEffects_.fishEyeStrength * progress, 0.0f, 1.5f);
+        const float radius = (std::max)(1.0f, filterEffects_.fishEyeRadius);
+
+        const float cx = w * 0.5f;
+        const float cy = h * 0.5f;
+        const float r2 = radius * radius;
+
+        auto Clamp = [](int v, int lo, int hi) { return (v < lo) ? lo : (v > hi ? hi : v); };
+        auto SampleNearest = [&](float fx, float fy) -> std::uint32_t {
+            int x = static_cast<int>(fx + 0.5f);
+            int y = static_cast<int>(fy + 0.5f);
+            x = Clamp(x, 0, w - 1);
+            y = Clamp(y, 0, h - 1);
+            return src[static_cast<std::size_t>(y) * static_cast<std::size_t>(w) + static_cast<std::size_t>(x)];
         };
 
-        float progress = filterEffects_.fishEyeProgress;
-        float strength = filterEffects_.fishEyeStrength * progress;
+        // 这里用 nearest 更快；如果你想更细腻，可以把它换成 bilinear。
+        for (int y = 0; y < h; ++y) {
+            const float dy = static_cast<float>(y) - cy;
+            for (int x = 0; x < w; ++x) {
+                const float dx = static_cast<float>(x) - cx;
+                const float dist2 = dx * dx + dy * dy;
+                if (dist2 >= r2) continue;
 
-        POINT center = { width_ / 2, height_ / 2 };
-        POINT ppt[3];
+                const float dist = std::sqrt(dist2);
+                const float t = dist / radius; // 0..1
 
-        // 创建鱼眼变形
-        float distortion = 1.0f - strength * 0.3f;
-        ppt[0].x = ToLongRound(static_cast<float>(center.x) - static_cast<float>(center.x) * distortion);
-        ppt[0].y = ToLongRound(static_cast<float>(center.y) - static_cast<float>(center.y) * distortion);
-        ppt[1].x = ToLongRound(static_cast<float>(center.x) + static_cast<float>(width_ - center.x) * distortion);
-        ppt[1].y = ToLongRound(static_cast<float>(center.y) - static_cast<float>(center.y) * distortion);
-        ppt[2].x = ToLongRound(static_cast<float>(center.x) - static_cast<float>(center.x) * distortion);
-        ppt[2].y = ToLongRound(static_cast<float>(center.y) + static_cast<float>(height_ - center.y) * distortion);
+                // 反向映射：dst -> src（中心区域更“放大”）
+                const float shrink = 1.0f - strength * (1.0f - t * t);
+                const float sx = cx + dx * shrink;
+                const float sy = cy + dy * shrink;
 
-        ApplyPlgBltTransform(ppt);
+                dst[static_cast<std::size_t>(y) * static_cast<std::size_t>(w) + static_cast<std::size_t>(x)] =
+                    SampleNearest(sx, sy);
+            }
+        }
     }
 
     // 漩涡效果 - 使用PlgBlt
@@ -959,19 +994,74 @@ private:
             return static_cast<LONG>(std::lround(v));
         };
 
-        float time = animationClock_.waveTime;
-        float waveX = sin(time) * filterEffects_.waveAmplitudeX;
-        float waveY = cos(time * 0.7f) * filterEffects_.waveAmplitudeY;
+        // 说明：以前的 PlgBlt 版本本质是“整体平移/剪切”，看起来不像“波浪”。
+        // 这里改成真正的“行列位移波浪”：每一行/每一列有不同偏移，才能看到“起伏”的感觉。
 
-        POINT ppt[3];
-        ppt[0].x = ToLongRound(waveX);
-        ppt[0].y = ToLongRound(waveY);
-        ppt[1].x = ToLongRound(static_cast<float>(width_) + waveX);
-        ppt[1].y = ToLongRound(waveY);
-        ppt[2].x = ToLongRound(waveX);
-        ppt[2].y = ToLongRound(static_cast<float>(height_) + waveY);
+        if (!dibBits_ || !tempBits_) {
+            // 退化方案：保持旧逻辑（至少还能动）
+            float time = animationClock_.waveTime;
+            float waveX = sin(time) * filterEffects_.waveAmplitudeX;
+            float waveY = cos(time * 0.7f) * filterEffects_.waveAmplitudeY;
 
-        ApplyPlgBltTransform(ppt);
+            POINT ppt[3];
+            ppt[0].x = ToLongRound(waveX);
+            ppt[0].y = ToLongRound(waveY);
+            ppt[1].x = ToLongRound(static_cast<float>(width_) + waveX);
+            ppt[1].y = ToLongRound(waveY);
+            ppt[2].x = ToLongRound(waveX);
+            ppt[2].y = ToLongRound(static_cast<float>(height_) + waveY);
+
+            ApplyPlgBltTransform(ppt);
+            return;
+        }
+
+        const int w = width_;
+        const int h = height_;
+        if (w <= 0 || h <= 0) return;
+
+        auto* dst = static_cast<std::uint32_t*>(dibBits_);
+        auto* src = static_cast<std::uint32_t*>(tempBits_);
+
+        const std::size_t bytes = static_cast<std::size_t>(w) * static_cast<std::size_t>(h) * sizeof(std::uint32_t);
+        std::memcpy(src, dst, bytes); // 先把当前画面复制到 temp 作为“采样源”
+
+        const float time = animationClock_.waveTime;
+        const float ampX = filterEffects_.waveAmplitudeX;
+        const float ampY = filterEffects_.waveAmplitudeY;
+        const float freqX = filterEffects_.waveFrequencyX;
+        const float freqY = filterEffects_.waveFrequencyY;
+
+        waveRowDx_.resize(static_cast<std::size_t>(h));
+        waveColDy_.resize(static_cast<std::size_t>(w));
+
+        // 每行一个 dx（y 方向的波）
+        for (int y = 0; y < h; ++y) {
+            const float phase = time * 2.0f + static_cast<float>(y) * freqY;
+            waveRowDx_[static_cast<std::size_t>(y)] = static_cast<int>(std::lround(std::sinf(phase) * ampX));
+        }
+        // 每列一个 dy（x 方向的波）
+        for (int x = 0; x < w; ++x) {
+            const float phase = time * 1.7f + static_cast<float>(x) * freqX;
+            waveColDy_[static_cast<std::size_t>(x)] = static_cast<int>(std::lround(std::cosf(phase) * ampY));
+        }
+
+        auto Clamp = [](int v, int lo, int hi) { return (v < lo) ? lo : (v > hi ? hi : v); };
+
+        for (int y = 0; y < h; ++y) {
+            const int dx = waveRowDx_[static_cast<std::size_t>(y)];
+            std::uint32_t* rowDst = dst + static_cast<std::size_t>(y) * static_cast<std::size_t>(w);
+
+            for (int x = 0; x < w; ++x) {
+                const int dy = waveColDy_[static_cast<std::size_t>(x)];
+
+                int sx = x - dx;
+                int sy = y - dy;
+                sx = Clamp(sx, 0, w - 1);
+                sy = Clamp(sy, 0, h - 1);
+
+                rowDst[x] = src[static_cast<std::size_t>(sy) * static_cast<std::size_t>(w) + static_cast<std::size_t>(sx)];
+            }
+        }
     }
 
     // 应用PlgBlt变换
